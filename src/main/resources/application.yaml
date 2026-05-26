@@ -1,0 +1,42 @@
+# Web Server
+server:
+  servlet:
+    context-path: /stq/api
+
+# Logging
+logging:
+  level:
+    academy.wakanda: ${LOG_LEVEL:DEBUG}
+
+# Spring
+spring:
+  application:
+    name: stq
+  profiles:
+    active: ${APP_PROFILE:local}
+
+  # Database
+  # Valores são carregados do Parameter Store ou variáveis de ambiente
+  # Ordem de precedência: System Property (Parameter Store) > Environment Variable > Default
+  datasource:
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/stqdb?currentSchema=stq}
+    username: ${DATASOURCE_USER:postgres}
+    password: ${DATASOURCE_PASS:postgres}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+# Authentication
+app:
+  jwt:
+    secret: ${JWT_SECRET:segredo-jwt-muito-longo-e-seguro-minimo-256-bits-para-hmac}
+    access-token-expiration: 28800    # 8h em segundos
+    refresh-token-expiration: 604800  # 7d em segundos
+
