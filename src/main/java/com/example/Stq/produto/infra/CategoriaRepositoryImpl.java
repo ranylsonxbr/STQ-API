@@ -33,6 +33,16 @@ public class CategoriaRepositoryImpl implements CategoriaRepository {
     }
 
     @Override
+    public boolean existsByNomeAndCategoriaPaiIdAndIdNot(String nome, UUID categoriaPaiId, UUID id) {
+        return jpa.existsByNomeAndCategoriaPai_IdAndIdNot(nome, categoriaPaiId, id);
+    }
+
+    @Override
+    public boolean existsByNomeAndCategoriaPaiIsNullAndIdNot(String nome, UUID id) {
+        return jpa.existsByNomeAndCategoriaPaiIsNullAndIdNot(nome, id);
+    }
+
+    @Override
     public boolean existsByCategoriaPaiId(UUID categoriaPaiId) {
         return jpa.existsByCategoriaPai_Id(categoriaPaiId);
     }

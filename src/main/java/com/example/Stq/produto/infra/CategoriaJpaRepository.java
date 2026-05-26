@@ -11,6 +11,8 @@ public interface CategoriaJpaRepository
 
     boolean existsByNomeAndCategoriaPai_Id(String nome, UUID categoriaPaiId);
     boolean existsByNomeAndCategoriaPaiIsNull(String nome);
+    boolean existsByNomeAndCategoriaPai_IdAndIdNot(String nome, UUID categoriaPaiId, UUID id);
+    boolean existsByNomeAndCategoriaPaiIsNullAndIdNot(String nome, UUID id);
     boolean existsByCategoriaPai_Id(UUID categoriaPaiId);
     boolean existsByCategoriaPai_IdAndAtivoTrue(UUID categoriaPaiId);
 }
