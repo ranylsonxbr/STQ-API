@@ -40,3 +40,10 @@ app:
     access-token-expiration: 28800    # 8h em segundos
     refresh-token-expiration: 604800  # 7d em segundos
 
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+
