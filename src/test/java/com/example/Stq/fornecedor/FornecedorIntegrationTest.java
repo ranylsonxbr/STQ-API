@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -48,7 +48,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
+@TestPropertySource(properties = {
+    "app.jwt.secret=segredo-jwt-muito-longo-e-seguro-para-testes-unitarios-256-bits",
+    "app.jwt.access-token-expiration=28800",
+    "app.jwt.refresh-token-expiration=604800",
+    "spring.flyway.clean-on-validation-error=true",
+    "spring.flyway.clean-disabled=false"
+})
 class FornecedorIntegrationTest {
 
     // -----------------------------------------------------------------------

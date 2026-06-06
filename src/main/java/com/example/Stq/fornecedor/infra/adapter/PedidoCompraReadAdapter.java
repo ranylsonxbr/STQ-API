@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
-@Component
+@Component("fornecedorPedidoCompraReadAdapter")
 public class PedidoCompraReadAdapter implements PedidoCompraReadPort {
     @Override
     public boolean existePedidoEmAbertoParaFornecedor(UUID fornecedorId) {

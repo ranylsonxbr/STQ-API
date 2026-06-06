@@ -59,6 +59,11 @@
 			<artifactId>java-jwt</artifactId>
 			<version>4.4.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.6.0</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.postgresql</groupId>
@@ -74,6 +79,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -136,19 +146,27 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.12</version>
 				<executions>
 					<execution>
-						<id>prepare-agent</id>
+						<id>default-prepare-agent</id>
 						<goals><goal>prepare-agent</goal></goals>
 					</execution>
 					<execution>
-						<id>check</id>
+						<id>default-report</id>
+						<phase>verify</phase>
+						<goals><goal>report</goal></goals>
+					</execution>
+					<execution>
+						<id>default-check</id>
 						<goals><goal>check</goal></goals>
 						<configuration>
 							<rules>
 								<rule>
 									<element>PACKAGE</element>
 									<includes>
+										<include>com.example.Stq.produto.domain.*</include>
+										<include>com.example.Stq.produto.application.*</include>
 										<include>com.example.Stq.fornecedor.domain.*</include>
 										<include>com.example.Stq.fornecedor.application.*</include>
 									</includes>
