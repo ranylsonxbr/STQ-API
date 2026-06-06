@@ -91,7 +91,7 @@ public class ProdutoServiceImpl implements ProdutoService {
 
     @Override
     public ProdutoDetalheResponse buscarPorSku(String sku) {
-        Produto produto = produtoRepository.findBySku(sku)
+        Produto produto = produtoRepository.findBySkuComVariacoes(sku)
                 .orElseThrow(() -> new ProdutoNotFoundException(sku));
         return ProdutoDetalheResponse.de(produto);
     }

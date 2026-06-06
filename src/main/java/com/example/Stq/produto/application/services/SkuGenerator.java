@@ -1,6 +1,5 @@
 package com.example.Stq.produto.application.services;
 
-import com.example.Stq.produto.domain.exception.SkuColisaoException;
 import org.springframework.stereotype.Component;
 
 import java.security.SecureRandom;
@@ -9,7 +8,6 @@ import java.security.SecureRandom;
 public class SkuGenerator {
 
     private static final String ALFABETO = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    private static final int TENTATIVAS_MAX = 5;
     private final SecureRandom random = new SecureRandom();
 
     public String gerarSkuProduto() {
@@ -18,20 +16,6 @@ public class SkuGenerator {
 
     public String gerarSkuVariacao(String skuProduto) {
         return skuProduto + "-" + sufixoAleatorio(3);
-    }
-
-    public interface SkuSupplier {
-        String get();
-    }
-
-    public String gerarComRetry(SkuSupplier supplier, java.util.function.Predicate<String> jaExiste) {
-        for (int i = 0; i < TENTATIVAS_MAX; i++) {
-            String sku = supplier.get();
-            if (!jaExiste.test(sku)) {
-                return sku;
-            }
-        }
-        throw new SkuColisaoException();
     }
 
     private String sufixoAleatorio(int tamanho) {

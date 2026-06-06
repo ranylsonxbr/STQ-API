@@ -208,7 +208,7 @@ class ProdutoServiceImplTest {
         @DisplayName("[PROD-C7] deve retornar produto por SKU")
         void deveBuscarPorSku() {
             var produto = produtoSalvo(categoriaAtiva());
-            when(produtoRepository.findBySku("PRD-ABC123")).thenReturn(Optional.of(produto));
+            when(produtoRepository.findBySkuComVariacoes("PRD-ABC123")).thenReturn(Optional.of(produto));
 
             var response = service.buscarPorSku("PRD-ABC123");
             assertThat(response.sku()).isEqualTo("PRD-ABC123");
@@ -227,7 +227,7 @@ class ProdutoServiceImplTest {
         @Test
         @DisplayName("deve lancar ProdutoNotFoundException quando nao encontrado por SKU")
         void deveLancarExcecaoNaoEncontradoPorSku() {
-            when(produtoRepository.findBySku("PRD-INVALIDO")).thenReturn(Optional.empty());
+            when(produtoRepository.findBySkuComVariacoes("PRD-INVALIDO")).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> service.buscarPorSku("PRD-INVALIDO"))
                     .isInstanceOf(ProdutoNotFoundException.class);

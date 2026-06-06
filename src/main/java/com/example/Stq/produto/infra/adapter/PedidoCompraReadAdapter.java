@@ -5,11 +5,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
-/**
- * Stub do port PedidoCompraReadPort.
- * Retorna sempre false enquanto o módulo pedido-compra não for implementado.
- * DEBT: substituir quando PedidoCompra for implementado (ver sdd/backlog.md).
- */
+// Stub — retorna false até módulo pedido-compra ser implementado (backlog.md DD-05)
 @Component
 public class PedidoCompraReadAdapter implements PedidoCompraReadPort {
 

@@ -38,10 +38,4 @@ class SkuGeneratorTest {
         assertThat(skus).hasSizeGreaterThan(990);
     }
 
-    @Test
-    @DisplayName("gerarComRetry deve retornar SKU quando nao ha colisao")
-    void gerarComRetrySemColisao() {
-        String sku = skuGenerator.gerarComRetry(skuGenerator::gerarSkuProduto, s -> false);
-        assertThat(sku).matches("PRD-[A-Z2-9]{6}");
-    }
 }

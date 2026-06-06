@@ -29,6 +29,11 @@ public class ProdutoRepositoryImpl implements ProdutoRepository {
     }
 
     @Override
+    public Optional<Produto> findBySkuComVariacoes(String sku) {
+        return jpa.findBySkuComVariacoes(sku);
+    }
+
+    @Override
     public Optional<Produto> findBySku(String sku) {
         return jpa.findBySku(sku);
     }

@@ -17,6 +17,10 @@ public interface ProdutoJpaRepository
     @Query("SELECT p FROM Produto p WHERE p.id = :id")
     Optional<Produto> findByIdComVariacoes(@Param("id") UUID id);
 
+    @EntityGraph(attributePaths = "variacoes")
+    @Query("SELECT p FROM Produto p WHERE p.sku = :sku")
+    Optional<Produto> findBySkuComVariacoes(@Param("sku") String sku);
+
     Optional<Produto> findBySku(String sku);
 
     boolean existsByCategoria_IdAndAtivoTrue(UUID categoriaId);
