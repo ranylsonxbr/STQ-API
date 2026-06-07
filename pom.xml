@@ -169,6 +169,8 @@
 										<include>com.example.Stq.produto.application.*</include>
 										<include>com.example.Stq.fornecedor.domain.*</include>
 										<include>com.example.Stq.fornecedor.application.*</include>
+										<include>com.example.Stq.movimentacao.domain.*</include>
+										<include>com.example.Stq.movimentacao.application.*</include>
 									</includes>
 									<limits>
 										<limit>
