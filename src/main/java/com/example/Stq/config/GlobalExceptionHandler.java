@@ -7,9 +7,14 @@ import com.example.Stq.fornecedor.domain.exception.CnpjInvalidoException;
 import com.example.Stq.fornecedor.domain.exception.EdicaoCnpjNaoPermitidaException;
 import com.example.Stq.fornecedor.domain.exception.FornecedorComPedidoEmAbertoException;
 import com.example.Stq.fornecedor.domain.exception.FornecedorNotFoundException;
+import com.example.Stq.movimentacao.domain.exception.EstoqueNotFoundException;
+import com.example.Stq.movimentacao.domain.exception.LocalizacaoTransferenciaInvalidaException;
+import com.example.Stq.movimentacao.domain.exception.QuantidadeInvalidaException;
+import com.example.Stq.movimentacao.domain.exception.SaldoInsuficienteException;
 import com.example.Stq.produto.domain.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -113,6 +118,33 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(SkuColisaoException.class)
     public ProblemDetail handleSkuColisao(SkuColisaoException ex) {
         return problema(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+    }
+
+    // --- movimentacao / estoque ---
+
+    @ExceptionHandler(EstoqueNotFoundException.class)
+    public ProblemDetail handleEstoqueNotFound(EstoqueNotFoundException ex) {
+        return problema(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(SaldoInsuficienteException.class)
+    public ProblemDetail handleSaldoInsuficiente(SaldoInsuficienteException ex) {
+        return problema(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+    }
+
+    @ExceptionHandler(QuantidadeInvalidaException.class)
+    public ProblemDetail handleQuantidadeInvalida(QuantidadeInvalidaException ex) {
+        return problema(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+    }
+
+    @ExceptionHandler(LocalizacaoTransferenciaInvalidaException.class)
+    public ProblemDetail handleLocalizacaoTransferencia(LocalizacaoTransferenciaInvalidaException ex) {
+        return problema(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ProblemDetail handleMetodoNaoSuportado(HttpRequestMethodNotSupportedException ex) {
+        return problema(HttpStatus.METHOD_NOT_ALLOWED, "Método não permitido para este recurso.");
     }
 
     // --- validacao ---
