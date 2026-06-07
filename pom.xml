@@ -167,6 +167,8 @@
 									<includes>
 										<include>com.example.Stq.produto.domain.*</include>
 										<include>com.example.Stq.produto.application.*</include>
+										<include>com.example.Stq.fornecedor.domain.*</include>
+										<include>com.example.Stq.fornecedor.application.*</include>
 									</includes>
 									<limits>
 										<limit>

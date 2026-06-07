@@ -2,6 +2,11 @@ package com.example.Stq.config;
 
 import com.example.Stq.autenticacao.domain.exception.ContaDesativadaException;
 import com.example.Stq.autenticacao.domain.exception.CredenciaisInvalidasException;
+import com.example.Stq.fornecedor.domain.exception.CnpjDuplicadoException;
+import com.example.Stq.fornecedor.domain.exception.CnpjInvalidoException;
+import com.example.Stq.fornecedor.domain.exception.EdicaoCnpjNaoPermitidaException;
+import com.example.Stq.fornecedor.domain.exception.FornecedorComPedidoEmAbertoException;
+import com.example.Stq.fornecedor.domain.exception.FornecedorNotFoundException;
 import com.example.Stq.produto.domain.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -25,6 +30,33 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ContaDesativadaException.class)
     public ProblemDetail handleContaDesativada(ContaDesativadaException ex) {
         return problema(HttpStatus.FORBIDDEN, ex.getMessage());
+    }
+
+    // --- fornecedor ---
+
+    @ExceptionHandler(FornecedorNotFoundException.class)
+    public ProblemDetail handleFornecedorNotFound(FornecedorNotFoundException ex) {
+        return problema(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(CnpjInvalidoException.class)
+    public ProblemDetail handleCnpjInvalido(CnpjInvalidoException ex) {
+        return problema(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(CnpjDuplicadoException.class)
+    public ProblemDetail handleCnpjDuplicado(CnpjDuplicadoException ex) {
+        return problema(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(EdicaoCnpjNaoPermitidaException.class)
+    public ProblemDetail handleEdicaoCnpjNaoPermitida(EdicaoCnpjNaoPermitidaException ex) {
+        return problema(HttpStatus.FORBIDDEN, ex.getMessage());
+    }
+
+    @ExceptionHandler(FornecedorComPedidoEmAbertoException.class)
+    public ProblemDetail handleFornecedorComPedidoEmAberto(FornecedorComPedidoEmAbertoException ex) {
+        return problema(HttpStatus.CONFLICT, ex.getMessage());
     }
 
     // --- produto: categoria ---
