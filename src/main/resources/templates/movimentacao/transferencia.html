@@ -27,7 +27,7 @@
       <div class="stq-card-header">Transferência entre Localizações</div>
       <div class="stq-card-body">
         <form th:action="@{/web/movimentacoes/transferencia}" th:object="${transferenciaForm}" method="post" novalidate
-              th:attr="data-variacoes-url=@{/web/movimentacoes/variacoes}">
+              th:attr="data-variacoes-url=@{/web/movimentacoes/variacoes},data-saldos-url=@{/web/movimentacoes/saldos}">
           <div class="stq-form-group">
             <label for="produtoId" class="stq-label">Produto <span class="stq-req">*</span></label>
             <select id="produtoId" name="produtoId" class="stq-select"
@@ -43,17 +43,19 @@
           <div class="stq-form-group" id="variacaoGroup" style="display:none">
             <label for="variacaoId" class="stq-label">Variação</label>
             <select id="variacaoId" name="variacaoId" class="stq-select"
-                    th:attr="data-selected=${transferenciaForm.variacaoId}">
+                    th:attr="data-selected=${transferenciaForm.variacaoId}"
+                    onchange="stqAtualizarSaldosSelect(null)">
               <option value="">Sem variação</option>
             </select>
           </div>
           <div class="stq-form-grid">
             <div class="stq-form-group">
-              <label for="localizacaoOrigem" class="stq-label">Origem <span class="stq-req">*</span></label>
-              <input type="text" id="localizacaoOrigem" name="localizacaoOrigem" class="stq-input"
-                     th:field="*{localizacaoOrigem}"
-                     th:classappend="${#fields.hasErrors('localizacaoOrigem')} ? ' is-invalid'"
-                     maxlength="60" required />
+              <label for="localizacaoOrigem" class="stq-label">Origem</label>
+              <select id="localizacaoOrigem" name="localizacaoOrigem" class="stq-select"
+                      th:classappend="${#fields.hasErrors('localizacaoOrigem')} ? ' is-invalid'"
+                      th:attr="data-selected=${transferenciaForm.localizacaoOrigem}">
+                <option value="">Selecione um produto primeiro</option>
+              </select>
               <div class="stq-invalid-msg" th:if="${#fields.hasErrors('localizacaoOrigem')}" th:errors="*{localizacaoOrigem}"></div>
             </div>
             <div class="stq-form-group">
@@ -61,7 +63,7 @@
               <input type="text" id="localizacaoDestino" name="localizacaoDestino" class="stq-input"
                      th:field="*{localizacaoDestino}"
                      th:classappend="${#fields.hasErrors('localizacaoDestino')} ? ' is-invalid'"
-                     maxlength="60" required />
+                     maxlength="60" placeholder="Ex.: Prateleira B2" />
               <div class="stq-invalid-msg" th:if="${#fields.hasErrors('localizacaoDestino')}" th:errors="*{localizacaoDestino}"></div>
             </div>
           </div>
@@ -94,15 +96,18 @@
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <script>
 lucide.createIcons();
-async function stqCarregarVariacoes(produtoSel, preselect) {
-  const form   = produtoSel.closest('form');
-  const url    = form.dataset.variacoesUrl;
-  const grupo  = document.getElementById('variacaoGroup');
-  const sel    = document.getElementById('variacaoId');
+let _saldosTodos = [], _saldosProdutoId = null;
+
+async function stqCarregarVariacoes(produtoSel, preselectVar) {
+  const form  = produtoSel.closest('form');
+  const url   = form.dataset.variacoesUrl;
+  const grupo = document.getElementById('variacaoGroup');
+  const sel   = document.getElementById('variacaoId');
   sel.innerHTML = '<option value="">Sem variação</option>';
   grupo.style.display = 'none';
+  _saldosTodos = []; _saldosProdutoId = null;
   const produtoId = produtoSel.value;
-  if (!produtoId) return;
+  if (!produtoId) { stqRenderSaldos([], null); return; }
   try {
     const vars = await fetch(url + '?produtoId=' + produtoId).then(r => r.json());
     if (vars.length > 0) {
@@ -110,13 +115,44 @@ async function stqCarregarVariacoes(produtoSel, preselect) {
         const opt = document.createElement('option');
         opt.value = v.id;
         opt.textContent = v.skuVariacao + ' — ' + v.atributo + ': ' + v.valor;
-        if (preselect && v.id === preselect) opt.selected = true;
+        if (preselectVar && v.id === preselectVar) opt.selected = true;
         sel.appendChild(opt);
       });
       grupo.style.display = '';
     }
   } catch (e) { console.error(e); }
+  await stqAtualizarSaldosSelect(document.getElementById('localizacaoOrigem').dataset.selected || null);
 }
+
+async function stqAtualizarSaldosSelect(preselectLoc) {
+  const produtoId  = document.getElementById('produtoId').value;
+  const variacaoId = document.getElementById('variacaoId').value;
+  const locSel     = document.getElementById('localizacaoOrigem');
+  if (!produtoId) { locSel.innerHTML = '<option value="">Selecione um produto primeiro</option>'; return; }
+  if (_saldosProdutoId !== produtoId) {
+    const form = document.querySelector('form[data-saldos-url]');
+    _saldosTodos = await fetch(form.dataset.saldosUrl + '?produtoId=' + produtoId).then(r => r.json()).catch(() => []);
+    _saldosProdutoId = produtoId;
+  }
+  const saldos = variacaoId
+    ? _saldosTodos.filter(s => s.variacaoId === variacaoId)
+    : _saldosTodos.filter(s => s.variacaoId === null);
+  stqRenderSaldos(saldos, preselectLoc);
+}
+
+function stqRenderSaldos(saldos, preselectLoc) {
+  const locSel = document.getElementById('localizacaoOrigem');
+  if (saldos.length === 0) { locSel.innerHTML = '<option value="">Nenhum estoque disponível</option>'; return; }
+  locSel.innerHTML = '';
+  saldos.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.localizacao !== null ? s.localizacao : '';
+    opt.textContent = (s.localizacao !== null ? s.localizacao : 'Sem localização') + ' — ' + s.saldoAtual + ' un.';
+    if (preselectLoc && opt.value === preselectLoc) opt.selected = true;
+    locSel.appendChild(opt);
+  });
+}
+
 (function() {
   const s = document.getElementById('produtoId');
   if (s.value) stqCarregarVariacoes(s, document.getElementById('variacaoId').dataset.selected || null);

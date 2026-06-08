@@ -52,7 +52,7 @@
     <div class="row g-3 mb-3" th:if="${relatorio != null and !relatorio.totais().empty}">
       <div class="col-6 col-md-3" th:each="t : ${relatorio.totais()}">
         <div class="stq-stat-card">
-          <div class="stq-stat-value" th:text="${t.total()}"></div>
+          <div class="stq-stat-value" th:text="${t.quantidade()}"></div>
           <div class="stq-stat-label" th:text="${t.tipo()}"></div>
         </div>
       </div>

@@ -53,25 +53,27 @@ public class RelatorioJpaRepository implements RelatorioRepository {
 
     @Override
     public List<MovimentacaoItem> movimentacoesPorPeriodo(LocalDate de, LocalDate ate, TipoMovimentacao tipo) {
-        Instant instDe = de != null ? de.atStartOfDay(ZoneOffset.UTC).toInstant() : null;
+        Instant instDe  = de  != null ? de.atStartOfDay(ZoneOffset.UTC).toInstant()              : null;
         Instant instAte = ate != null ? ate.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant() : null;
 
-        List<Object[]> rows = em.createQuery("""
+        StringBuilder jpql = new StringBuilder("""
                 SELECT m.produto.sku, m.produto.nome,
                        CAST(m.tipo AS string), CAST(m.origem AS string),
                        m.quantidade, m.realizadoEm
                 FROM Movimentacao m JOIN m.produto p
-                WHERE (:de IS NULL OR m.realizadoEm >= :de)
-                  AND (:ate IS NULL OR m.realizadoEm < :ate)
-                  AND (:tipo IS NULL OR m.tipo = :tipo)
-                ORDER BY m.realizadoEm DESC
-                """, Object[].class)
-                .setParameter("de", instDe)
-                .setParameter("ate", instAte)
-                .setParameter("tipo", tipo)
-                .getResultList();
+                WHERE 1=1
+                """);
+        if (instDe  != null) jpql.append(" AND m.realizadoEm >= :de");
+        if (instAte != null) jpql.append(" AND m.realizadoEm < :ate");
+        if (tipo    != null) jpql.append(" AND m.tipo = :tipo");
+        jpql.append(" ORDER BY m.realizadoEm DESC");
 
-        return rows.stream().map(r -> new MovimentacaoItem(
+        var query = em.createQuery(jpql.toString(), Object[].class);
+        if (instDe  != null) query.setParameter("de",   instDe);
+        if (instAte != null) query.setParameter("ate",  instAte);
+        if (tipo    != null) query.setParameter("tipo", tipo);
+
+        return query.getResultList().stream().map(r -> new MovimentacaoItem(
                 (String) r[0], (String) r[1], (String) r[2], (String) r[3],
                 (Integer) r[4], (Instant) r[5]
         )).toList();
@@ -79,42 +81,46 @@ public class RelatorioJpaRepository implements RelatorioRepository {
 
     @Override
     public List<TotalPorTipo> totaisPorTipo(LocalDate de, LocalDate ate, TipoMovimentacao tipo) {
-        Instant instDe = de != null ? de.atStartOfDay(ZoneOffset.UTC).toInstant() : null;
+        Instant instDe  = de  != null ? de.atStartOfDay(ZoneOffset.UTC).toInstant()              : null;
         Instant instAte = ate != null ? ate.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant() : null;
 
-        List<Object[]> rows = em.createQuery("""
+        StringBuilder jpql = new StringBuilder("""
                 SELECT CAST(m.tipo AS string), SUM(m.quantidade)
                 FROM Movimentacao m
-                WHERE (:de IS NULL OR m.realizadoEm >= :de)
-                  AND (:ate IS NULL OR m.realizadoEm < :ate)
-                  AND (:tipo IS NULL OR m.tipo = :tipo)
-                GROUP BY m.tipo
-                """, Object[].class)
-                .setParameter("de", instDe)
-                .setParameter("ate", instAte)
-                .setParameter("tipo", tipo)
-                .getResultList();
+                WHERE 1=1
+                """);
+        if (instDe  != null) jpql.append(" AND m.realizadoEm >= :de");
+        if (instAte != null) jpql.append(" AND m.realizadoEm < :ate");
+        if (tipo    != null) jpql.append(" AND m.tipo = :tipo");
+        jpql.append(" GROUP BY m.tipo");
 
-        return rows.stream().map(r -> new TotalPorTipo((String) r[0], (Long) r[1])).toList();
+        var query = em.createQuery(jpql.toString(), Object[].class);
+        if (instDe  != null) query.setParameter("de",   instDe);
+        if (instAte != null) query.setParameter("ate",  instAte);
+        if (tipo    != null) query.setParameter("tipo", tipo);
+
+        return query.getResultList().stream().map(r -> new TotalPorTipo((String) r[0], (Long) r[1])).toList();
     }
 
     @Override
     public List<PedidoCompraItem> pedidosPorPeriodo(LocalDate de, LocalDate ate, StatusPedido status) {
-        List<Object[]> rows = em.createQuery("""
+        StringBuilder jpql = new StringBuilder("""
                 SELECT pc.id, pc.fornecedor.razaoSocial, CAST(pc.status AS string),
                        pc.dataEmissao, pc.totalPedido
                 FROM PedidoCompra pc JOIN pc.fornecedor f
-                WHERE (:de IS NULL OR pc.dataEmissao >= :de)
-                  AND (:ate IS NULL OR pc.dataEmissao <= :ate)
-                  AND (:status IS NULL OR pc.status = :status)
-                ORDER BY pc.dataEmissao DESC
-                """, Object[].class)
-                .setParameter("de", de)
-                .setParameter("ate", ate)
-                .setParameter("status", status)
-                .getResultList();
+                WHERE 1=1
+                """);
+        if (de     != null) jpql.append(" AND pc.dataEmissao >= :de");
+        if (ate    != null) jpql.append(" AND pc.dataEmissao <= :ate");
+        if (status != null) jpql.append(" AND pc.status = :status");
+        jpql.append(" ORDER BY pc.dataEmissao DESC");
 
-        return rows.stream().map(r -> new PedidoCompraItem(
+        var query = em.createQuery(jpql.toString(), Object[].class);
+        if (de     != null) query.setParameter("de",     de);
+        if (ate    != null) query.setParameter("ate",    ate);
+        if (status != null) query.setParameter("status", status);
+
+        return query.getResultList().stream().map(r -> new PedidoCompraItem(
                 (java.util.UUID) r[0], (String) r[1], (String) r[2],
                 (LocalDate) r[3], (BigDecimal) r[4]
         )).toList();
@@ -122,17 +128,20 @@ public class RelatorioJpaRepository implements RelatorioRepository {
 
     @Override
     public BigDecimal totalGasto(LocalDate de, LocalDate ate) {
-        Object result = em.createQuery("""
+        StringBuilder jpql = new StringBuilder("""
                 SELECT COALESCE(SUM(pc.totalPedido), 0)
                 FROM PedidoCompra pc
                 WHERE pc.status = :recebido
-                  AND (:de IS NULL OR pc.dataEmissao >= :de)
-                  AND (:ate IS NULL OR pc.dataEmissao <= :ate)
-                """)
-                .setParameter("recebido", StatusPedido.RECEBIDO)
-                .setParameter("de", de)
-                .setParameter("ate", ate)
-                .getSingleResult();
+                """);
+        if (de  != null) jpql.append(" AND pc.dataEmissao >= :de");
+        if (ate != null) jpql.append(" AND pc.dataEmissao <= :ate");
+
+        var query = em.createQuery(jpql.toString())
+                .setParameter("recebido", StatusPedido.RECEBIDO);
+        if (de  != null) query.setParameter("de",  de);
+        if (ate != null) query.setParameter("ate", ate);
+
+        Object result = query.getSingleResult();
         return result instanceof BigDecimal bd ? bd : new BigDecimal(result.toString());
     }
 
