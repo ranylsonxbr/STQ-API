@@ -9,6 +9,7 @@ import com.example.Stq.movimentacao.application.dto.AjusteRequest;
 import com.example.Stq.movimentacao.application.dto.EntradaRequest;
 import com.example.Stq.movimentacao.application.dto.SaidaRequest;
 import com.example.Stq.movimentacao.application.dto.TransferenciaRequest;
+import com.example.Stq.movimentacao.application.dto.EstoqueResponse;
 import com.example.Stq.movimentacao.application.services.EstoqueService;
 import com.example.Stq.movimentacao.application.services.MovimentacaoService;
 import com.example.Stq.movimentacao.domain.EstoqueFiltro;
@@ -58,6 +59,12 @@ public class MovimentacaoWebController {
     @ResponseBody
     public List<VariacaoResponse> variacoesPorProduto(@RequestParam UUID produtoId) {
         return variacaoProdutoService.listarAtivasPorProduto(produtoId);
+    }
+
+    @GetMapping(value = "/web/movimentacoes/saldos", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<EstoqueResponse> saldosPorProduto(@RequestParam UUID produtoId) {
+        return estoqueService.listarPorProduto(produtoId);
     }
 
     // -------------------------------------------------------------------------

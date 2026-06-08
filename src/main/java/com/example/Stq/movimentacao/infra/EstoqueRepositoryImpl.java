@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -30,6 +31,11 @@ public class EstoqueRepositoryImpl implements EstoqueRepository {
     @Override
     public Page<Estoque> findAll(EstoqueFiltro filtro, Pageable pageable) {
         return jpa.findAll(EstoqueSpecs.comFiltro(filtro), pageable);
+    }
+
+    @Override
+    public List<Estoque> findByProdutoId(UUID produtoId) {
+        return jpa.findByProduto_IdOrderByLocalizacaoAsc(produtoId);
     }
 
     @Override

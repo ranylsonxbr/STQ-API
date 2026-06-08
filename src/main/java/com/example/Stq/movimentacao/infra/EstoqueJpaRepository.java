@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,4 +24,7 @@ public interface EstoqueJpaRepository
     Optional<Estoque> buscarCombinacao(@Param("produtoId") UUID produtoId,
                                        @Param("variacaoId") UUID variacaoId,
                                        @Param("localizacao") String localizacao);
+
+    @EntityGraph(attributePaths = {"produto", "variacao"})
+    List<Estoque> findByProduto_IdOrderByLocalizacaoAsc(UUID produtoId);
 }
