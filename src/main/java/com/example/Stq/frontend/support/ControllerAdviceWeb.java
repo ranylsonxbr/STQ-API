@@ -3,16 +3,31 @@ package com.example.Stq.frontend.support;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.servlet.ModelAndView;
+
+import java.beans.PropertyEditorSupport;
+import java.util.UUID;
 
 @ControllerAdvice(basePackages = "com.example.Stq.frontend")
 @RequiredArgsConstructor
 public class ControllerAdviceWeb {
 
     private final UsuarioLogado usuarioLogado;
+
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        binder.registerCustomEditor(UUID.class, new PropertyEditorSupport() {
+            @Override
+            public void setAsText(String text) {
+                setValue(text == null || text.isBlank() ? null : UUID.fromString(text));
+            }
+        });
+    }
 
     @ModelAttribute
     public void injetarDadosUsuario(Authentication auth, org.springframework.ui.Model model) {

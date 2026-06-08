@@ -5,6 +5,7 @@ import com.example.Stq.produto.domain.VariacaoProdutoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,6 +28,11 @@ public class VariacaoProdutoRepositoryImpl implements VariacaoProdutoRepository 
     @Override
     public boolean existsByProdutoIdAndAtributoAndValor(UUID produtoId, String atributo, String valor) {
         return jpa.existsByProduto_IdAndAtributoAndValor(produtoId, atributo, valor);
+    }
+
+    @Override
+    public List<VariacaoProduto> findAtivasByProdutoId(UUID produtoId) {
+        return jpa.findByProduto_IdAndAtivoTrue(produtoId);
     }
 
     @Override

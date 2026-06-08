@@ -13,10 +13,16 @@ import com.example.Stq.movimentacao.application.services.EstoqueService;
 import com.example.Stq.movimentacao.application.services.MovimentacaoService;
 import com.example.Stq.movimentacao.domain.EstoqueFiltro;
 import com.example.Stq.movimentacao.domain.MovimentacaoFiltro;
+import com.example.Stq.produto.application.dto.VariacaoResponse;
+import com.example.Stq.produto.application.services.ProdutoService;
+import com.example.Stq.produto.application.services.VariacaoProdutoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -25,7 +31,12 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
+import java.util.UUID;
 
 @Controller
 @RequiredArgsConstructor
@@ -33,7 +44,21 @@ public class MovimentacaoWebController {
 
     private final MovimentacaoService movimentacaoService;
     private final EstoqueService estoqueService;
+    private final ProdutoService produtoService;
+    private final VariacaoProdutoService variacaoProdutoService;
     private final UsuarioLogado usuarioLogado;
+
+    private static final Pageable TODOS = PageRequest.of(0, 2000, Sort.by("nome"));
+
+    private void carregarProdutos(Model model) {
+        model.addAttribute("produtos", produtoService.listar(null, true, null, TODOS).getContent());
+    }
+
+    @GetMapping(value = "/web/movimentacoes/variacoes", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<VariacaoResponse> variacoesPorProduto(@RequestParam UUID produtoId) {
+        return variacaoProdutoService.listarAtivasPorProduto(produtoId);
+    }
 
     // -------------------------------------------------------------------------
     // Histórico de movimentações
@@ -68,6 +93,7 @@ public class MovimentacaoWebController {
     @GetMapping("/web/movimentacoes/entrada")
     public String entradaForm(Model model) {
         model.addAttribute("entradaForm", new EntradaForm(null, null, null, null, null));
+        carregarProdutos(model);
         return "movimentacao/entrada";
     }
 
@@ -80,6 +106,7 @@ public class MovimentacaoWebController {
             RedirectAttributes redirectAttributes,
             Model model) {
         if (bindingResult.hasErrors()) {
+            carregarProdutos(model);
             return "movimentacao/entrada";
         }
         var request = new EntradaRequest(
@@ -101,6 +128,7 @@ public class MovimentacaoWebController {
     @GetMapping("/web/movimentacoes/saida")
     public String saidaForm(Model model) {
         model.addAttribute("saidaForm", new SaidaForm(null, null, null, null, null));
+        carregarProdutos(model);
         return "movimentacao/saida";
     }
 
@@ -113,6 +141,7 @@ public class MovimentacaoWebController {
             RedirectAttributes redirectAttributes,
             Model model) {
         if (bindingResult.hasErrors()) {
+            carregarProdutos(model);
             return "movimentacao/saida";
         }
         try {
@@ -139,6 +168,7 @@ public class MovimentacaoWebController {
     public String transferenciaForm(Model model) {
         model.addAttribute("transferenciaForm",
                 new TransferenciaForm(null, null, null, null, null, null));
+        carregarProdutos(model);
         return "movimentacao/transferencia";
     }
 
@@ -151,6 +181,7 @@ public class MovimentacaoWebController {
             RedirectAttributes redirectAttributes,
             Model model) {
         if (bindingResult.hasErrors()) {
+            carregarProdutos(model);
             return "movimentacao/transferencia";
         }
         var request = new TransferenciaRequest(
@@ -174,6 +205,7 @@ public class MovimentacaoWebController {
     @PreAuthorize("hasRole('ADMIN')")
     public String ajusteForm(Model model) {
         model.addAttribute("ajusteForm", new AjusteForm(null, null, null, null, null));
+        carregarProdutos(model);
         return "movimentacao/ajuste";
     }
 
@@ -186,6 +218,7 @@ public class MovimentacaoWebController {
             RedirectAttributes redirectAttributes,
             Model model) {
         if (bindingResult.hasErrors()) {
+            carregarProdutos(model);
             return "movimentacao/ajuste";
         }
         var request = new AjusteRequest(

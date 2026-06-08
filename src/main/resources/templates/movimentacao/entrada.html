@@ -23,21 +23,29 @@
   <main class="stq-content">
     <div th:replace="~{layout/fragments/alertas :: alertas}"></div>
 
-    <div class="stq-card" style="max-width: 560px;">
+    <div class="stq-card" style="max-width: 560px; margin: 0 auto;">
       <div class="stq-card-header">Registrar Entrada de Estoque</div>
       <div class="stq-card-body">
-        <form th:action="@{/web/movimentacoes/entrada}" th:object="${entradaForm}" method="post" novalidate>
+        <form th:action="@{/web/movimentacoes/entrada}" th:object="${entradaForm}" method="post" novalidate
+              th:attr="data-variacoes-url=@{/web/movimentacoes/variacoes}">
           <div class="stq-form-group">
-            <label for="produtoId" class="stq-label">ID do Produto <span class="stq-req">*</span></label>
-            <input type="text" id="produtoId" name="produtoId" class="stq-input"
-                   th:field="*{produtoId}" th:classappend="${#fields.hasErrors('produtoId')} ? ' is-invalid'"
-                   placeholder="UUID do produto" required />
+            <label for="produtoId" class="stq-label">Produto <span class="stq-req">*</span></label>
+            <select id="produtoId" name="produtoId" class="stq-select"
+                    th:classappend="${#fields.hasErrors('produtoId')} ? ' is-invalid'"
+                    th:field="*{produtoId}" required onchange="stqCarregarVariacoes(this)">
+              <option value="">Selecione um produto...</option>
+              <option th:each="p : ${produtos}"
+                      th:value="${p.id}"
+                      th:text="${p.sku + ' — ' + p.nome}"></option>
+            </select>
             <div class="stq-invalid-msg" th:if="${#fields.hasErrors('produtoId')}" th:errors="*{produtoId}"></div>
           </div>
-          <div class="stq-form-group">
-            <label for="variacaoId" class="stq-label">ID da Variação</label>
-            <input type="text" id="variacaoId" name="variacaoId" class="stq-input"
-                   th:field="*{variacaoId}" placeholder="UUID da variação (opcional)" />
+          <div class="stq-form-group" id="variacaoGroup" style="display:none">
+            <label for="variacaoId" class="stq-label">Variação</label>
+            <select id="variacaoId" name="variacaoId" class="stq-select"
+                    th:attr="data-selected=${entradaForm.variacaoId}">
+              <option value="">Sem variação</option>
+            </select>
           </div>
           <div class="stq-form-group">
             <label for="localizacao" class="stq-label">Localização</label>
@@ -73,6 +81,35 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmqXDsK8VZMu6Z+9ZWAgFRjh1Ah2" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-<script>lucide.createIcons();</script>
+<script>
+lucide.createIcons();
+async function stqCarregarVariacoes(produtoSel, preselect) {
+  const form   = produtoSel.closest('form');
+  const url    = form.dataset.variacoesUrl;
+  const grupo  = document.getElementById('variacaoGroup');
+  const sel    = document.getElementById('variacaoId');
+  sel.innerHTML = '<option value="">Sem variação</option>';
+  grupo.style.display = 'none';
+  const produtoId = produtoSel.value;
+  if (!produtoId) return;
+  try {
+    const vars = await fetch(url + '?produtoId=' + produtoId).then(r => r.json());
+    if (vars.length > 0) {
+      vars.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v.id;
+        opt.textContent = v.skuVariacao + ' — ' + v.atributo + ': ' + v.valor;
+        if (preselect && v.id === preselect) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      grupo.style.display = '';
+    }
+  } catch (e) { console.error(e); }
+}
+(function() {
+  const s = document.getElementById('produtoId');
+  if (s.value) stqCarregarVariacoes(s, document.getElementById('variacaoId').dataset.selected || null);
+})();
+</script>
 </body>
 </html>
