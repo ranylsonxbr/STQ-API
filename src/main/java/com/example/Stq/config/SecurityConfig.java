@@ -1,14 +1,18 @@
 package com.example.Stq.config;
 
+import com.example.Stq.autenticacao.infra.UsuarioDetailsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -30,10 +34,50 @@ public class SecurityConfig {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final JwtFilter jwtFilter;
+    private final UsuarioDetailsService usuarioDetailsService;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    @Order(1)
+    public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception {
         return http
+                .securityMatcher("/web/**", "/css/**", "/js/**")
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/web/login", "/web/acesso-negado", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/web/movimentacoes/ajuste/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/web/pedidos/*/aprovar").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/web/produtos/**").hasAnyRole("ADMIN", "OPERADOR")
+                        .requestMatchers(HttpMethod.POST, "/web/fornecedores/**").hasAnyRole("ADMIN", "OPERADOR")
+                        .requestMatchers(HttpMethod.POST, "/web/movimentacoes/**").hasAnyRole("ADMIN", "OPERADOR")
+                        .requestMatchers(HttpMethod.POST, "/web/pedidos/**").hasAnyRole("ADMIN", "OPERADOR")
+                        .anyRequest().authenticated()
+                )
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .formLogin(form -> form
+                        .loginPage("/web/login")
+                        .loginProcessingUrl("/web/login")
+                        .usernameParameter("email")
+                        .passwordParameter("senha")
+                        .defaultSuccessUrl("/web/dashboard", true)
+                        .failureUrl("/web/login?erro")
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/web/logout")
+                        .logoutSuccessUrl("/web/login?logout")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                        .permitAll()
+                )
+                .exceptionHandling(ex -> ex.accessDeniedPage("/web/acesso-negado"))
+                .authenticationProvider(daoAuthenticationProvider())
+                .build();
+    }
+
+    @Bean
+    @Order(2)
+    public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
+        return http
+                .securityMatcher("/api/**", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/error")
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
@@ -50,6 +94,13 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
+    }
+
+    private DaoAuthenticationProvider daoAuthenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(usuarioDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
     }
 
     @Bean

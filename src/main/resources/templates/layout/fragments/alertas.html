@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="alertas">
+  <div class="alert alert-success alert-dismissible fade show"
+       role="alert"
+       th:if="${sucesso}"
+       th:text="${sucesso}">
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  <div class="alert alert-danger alert-dismissible fade show"
+       role="alert"
+       th:if="${erro}"
+       th:text="${erro}">
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+</div>
+</body>
+</html>
