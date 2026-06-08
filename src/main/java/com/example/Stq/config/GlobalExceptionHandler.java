@@ -11,6 +11,11 @@ import com.example.Stq.movimentacao.domain.exception.EstoqueNotFoundException;
 import com.example.Stq.movimentacao.domain.exception.LocalizacaoTransferenciaInvalidaException;
 import com.example.Stq.movimentacao.domain.exception.QuantidadeInvalidaException;
 import com.example.Stq.movimentacao.domain.exception.SaldoInsuficienteException;
+import com.example.Stq.pedidocompra.domain.exception.FornecedorInativoException;
+import com.example.Stq.pedidocompra.domain.exception.ItemDuplicadoException;
+import com.example.Stq.pedidocompra.domain.exception.PedidoCompraNotFoundException;
+import com.example.Stq.pedidocompra.domain.exception.PedidoSemItensException;
+import com.example.Stq.pedidocompra.domain.exception.TransicaoStatusInvalidaException;
 import com.example.Stq.produto.domain.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -139,6 +144,33 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(LocalizacaoTransferenciaInvalidaException.class)
     public ProblemDetail handleLocalizacaoTransferencia(LocalizacaoTransferenciaInvalidaException ex) {
+        return problema(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+    }
+
+    // --- pedido-compra ---
+
+    @ExceptionHandler(PedidoCompraNotFoundException.class)
+    public ProblemDetail handlePedidoCompraNotFound(PedidoCompraNotFoundException ex) {
+        return problema(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(TransicaoStatusInvalidaException.class)
+    public ProblemDetail handleTransicaoStatusInvalida(TransicaoStatusInvalidaException ex) {
+        return problema(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(ItemDuplicadoException.class)
+    public ProblemDetail handleItemDuplicado(ItemDuplicadoException ex) {
+        return problema(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(PedidoSemItensException.class)
+    public ProblemDetail handlePedidoSemItens(PedidoSemItensException ex) {
+        return problema(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(FornecedorInativoException.class)
+    public ProblemDetail handleFornecedorInativo(FornecedorInativoException ex) {
         return problema(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
     }
 

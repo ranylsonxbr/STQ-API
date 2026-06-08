@@ -101,13 +101,14 @@ class MovimentacaoIntegrationTest {
     }
 
     private Usuario criarUsuario(String email, Perfil perfil) {
-        return usuarioJpaRepository.save(Usuario.builder()
-                .nome(perfil.name())
-                .email(email)
-                .senha("hash")
-                .perfil(perfil)
-                .ativo(true)
-                .build());
+        return ((com.example.Stq.autenticacao.domain.UsuarioRepository) usuarioJpaRepository)
+                .save(Usuario.builder()
+                        .nome(perfil.name())
+                        .email(email)
+                        .senha("hash")
+                        .perfil(perfil)
+                        .ativo(true)
+                        .build());
     }
 
     private RequestPostProcessor autenticar(Usuario usuario) {
