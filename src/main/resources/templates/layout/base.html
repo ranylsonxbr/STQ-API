@@ -78,9 +78,7 @@
 
   <div class="stq-sidebar-footer">
     <div class="stq-avatar"
-         th:text="${nomeUsuario != null and #strings.length(nomeUsuario) >= 2}
-                   ? #strings.toUpperCase(#strings.substring(nomeUsuario, 0, 2))
-                   : 'U'">U</div>
+         th:text="${nomeUsuario != null and #strings.length(nomeUsuario) >= 2 ? #strings.toUpperCase(#strings.substring(nomeUsuario, 0, 2)) : 'U'}">U</div>
     <div class="stq-footer-info">
       <div class="stq-footer-name" th:text="${nomeUsuario} ?: 'Usuário'">Usuário</div>
       <div class="stq-footer-role" th:text="${perfilUsuario} ?: ''"></div>

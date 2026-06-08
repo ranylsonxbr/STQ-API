@@ -23,7 +23,7 @@
   <main class="stq-content">
     <div th:replace="~{layout/fragments/alertas :: alertas}"></div>
 
-    <div class="stq-card" style="max-width: 640px;">
+    <div class="stq-card" style="max-width: 640px; margin: 0 auto;">
       <div class="stq-card-header" th:text="${editando} ? 'Editar Fornecedor' : 'Informações do fornecedor'"></div>
       <div class="stq-card-body">
         <form th:action="${editando} ? @{/web/fornecedores/{id}(id=${fornecedorId})} : @{/web/fornecedores}"

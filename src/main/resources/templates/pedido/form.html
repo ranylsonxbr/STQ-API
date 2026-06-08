@@ -23,7 +23,7 @@
   <main class="stq-content">
     <div th:replace="~{layout/fragments/alertas :: alertas}"></div>
 
-    <div class="stq-card" style="max-width: 680px;">
+    <div class="stq-card" style="max-width: 680px; margin: 0 auto;">
       <div class="stq-card-header">Novo Pedido de Compra</div>
       <div class="stq-card-body">
         <form th:action="@{/web/pedidos}" th:object="${pedidoForm}" method="post" novalidate>
