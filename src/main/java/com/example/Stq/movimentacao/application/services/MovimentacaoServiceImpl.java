@@ -38,8 +38,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MovimentacaoServiceImpl implements MovimentacaoService {
 
-    private static final String LOCALIZACAO_PADRAO = "PADRAO";
-
     private final EstoqueRepository estoqueRepository;
     private final MovimentacaoRepository movimentacaoRepository;
     private final ProdutoRepository produtoRepository;
@@ -68,7 +66,7 @@ public class MovimentacaoServiceImpl implements MovimentacaoService {
     public MovimentacaoResponse registrarEntradaPorPedido(EntradaPedidoComando cmd, UUID usuarioId) {
         Produto produto = carregarProduto(cmd.produtoId());
         VariacaoProduto variacao = carregarVariacaoOpcional(cmd.variacaoId(), produto.getId());
-        Estoque estoque = obterOuCriarEstoque(produto, variacao, LOCALIZACAO_PADRAO);
+        Estoque estoque = obterOuCriarEstoque(produto, variacao, null);
 
         int antes = estoque.getSaldoAtual();
         int depois = antes + cmd.quantidade();
