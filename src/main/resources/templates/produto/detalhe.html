@@ -3,132 +3,128 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>estoque-ai — Detalhe do Produto</title>
-  <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-        crossorigin="anonymous" />
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stq — Produto</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+  <link rel="stylesheet" th:href="@{/css/app.css}" />
 </head>
-<body>
+<body class="stq-layout">
 
-<div th:replace="~{layout/base :: navbar}"></div>
+<aside th:replace="~{layout/base :: sidebar('produtos')}"></aside>
 
-<div class="container mt-4">
-  <nav aria-label="breadcrumb" class="mb-3">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a th:href="@{/web/produtos}">Produtos</a></li>
-      <li class="breadcrumb-item active" th:text="${produto.nome}"></li>
-    </ol>
-  </nav>
+<div class="stq-main">
+  <header class="stq-topbar">
+    <nav class="stq-topbar-breadcrumb">
+      <a th:href="@{/web/produtos}">Produtos</a>
+      <span class="sep">/</span>
+      <span class="cur" th:text="${produto.sku}"></span>
+    </nav>
+    <div class="d-flex gap-2" sec:authorize="hasAnyRole('ADMIN','OPERADOR')">
+      <a th:href="@{/web/produtos/{id}/editar(id=${produto.id})}" class="stq-btn stq-btn-outline stq-btn-sm">
+        <i data-lucide="edit-2" class="stq-icon"></i> Editar
+      </a>
+      <form th:action="@{/web/produtos/{id}/desativar(id=${produto.id})}" method="post"
+            th:if="${produto.ativo}" onsubmit="return confirm('Desativar este produto?')" class="d-inline">
+        <button type="submit" class="stq-btn stq-btn-danger-soft stq-btn-sm">
+          <i data-lucide="ban" class="stq-icon"></i> Desativar
+        </button>
+      </form>
+    </div>
+  </header>
 
-  <div th:replace="~{layout/fragments/alertas :: alertas}"></div>
+  <main class="stq-content">
+    <div th:replace="~{layout/fragments/alertas :: alertas}"></div>
 
-  <div class="card mb-4">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <h4 class="mb-0" th:text="${produto.nome}">Nome do Produto</h4>
-      <div class="d-flex gap-2" sec:authorize="hasAnyRole('ADMIN','OPERADOR')">
-        <a th:href="@{/web/produtos/{id}/editar(id=${produto.id})}"
-           class="btn btn-outline-secondary btn-sm">Editar</a>
-        <form th:action="@{/web/produtos/{id}/desativar(id=${produto.id})}"
-              method="post"
-              th:if="${produto.ativo}"
-              onsubmit="return confirm('Desativar este produto?')">
-          <button type="submit" class="btn btn-outline-danger btn-sm">Desativar</button>
-        </form>
+    <div class="row g-3 mb-3">
+      <div class="col-lg-8">
+        <div class="stq-card">
+          <div class="stq-card-header" th:text="${produto.nome}"></div>
+          <div class="stq-card-body">
+            <dl class="stq-dl">
+              <dt>SKU</dt>
+              <dd><span class="stq-code" th:text="${produto.sku}"></span></dd>
+              <dt>Descrição</dt>
+              <dd th:text="${produto.descricao} ?: '—'"></dd>
+              <dt>Categoria</dt>
+              <dd th:text="${produto.categoriaNome}"></dd>
+              <dt>Unidade</dt>
+              <dd th:text="${produto.unidadeMedida}"></dd>
+              <dt>Estoque Mínimo</dt>
+              <dd th:text="${produto.estoqueMinimo}"></dd>
+              <dt>Status</dt>
+              <dd>
+                <span class="stq-badge"
+                      th:classappend="${produto.ativo} ? 'stq-badge-success' : 'stq-badge-default'">
+                  <span class="stq-badge-dot"></span>
+                  <span th:text="${produto.ativo} ? 'Ativo' : 'Inativo'"></span>
+                </span>
+              </dd>
+              <dt>Criado em</dt>
+              <dd th:text="${#temporals.format(produto.criadoEm, 'dd/MM/yyyy HH:mm')}"></dd>
+            </dl>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="card-body">
-      <dl class="row">
-        <dt class="col-sm-3">SKU</dt>
-        <dd class="col-sm-9"><code th:text="${produto.sku}"></code></dd>
 
-        <dt class="col-sm-3">Descrição</dt>
-        <dd class="col-sm-9" th:text="${produto.descricao} ?: '—'"></dd>
-
-        <dt class="col-sm-3">Categoria</dt>
-        <dd class="col-sm-9" th:text="${produto.categoriaNome}"></dd>
-
-        <dt class="col-sm-3">Unidade de Medida</dt>
-        <dd class="col-sm-9" th:text="${produto.unidadeMedida}"></dd>
-
-        <dt class="col-sm-3">Estoque Mínimo</dt>
-        <dd class="col-sm-9" th:text="${produto.estoqueMinimo}"></dd>
-
-        <dt class="col-sm-3">Status</dt>
-        <dd class="col-sm-9">
-          <span class="badge"
-                th:classappend="${produto.ativo} ? 'bg-success' : 'bg-secondary'"
-                th:text="${produto.ativo} ? 'Ativo' : 'Inativo'"></span>
-        </dd>
-
-        <dt class="col-sm-3">Criado em</dt>
-        <dd class="col-sm-9" th:text="${#temporals.format(produto.criadoEm, 'dd/MM/yyyy HH:mm')}"></dd>
-      </dl>
-    </div>
-  </div>
-
-  <!-- Variações -->
-  <div class="card mb-4">
-    <div class="card-header">
-      <h5 class="mb-0">Variações</h5>
-    </div>
-    <div class="card-body">
-      <div class="table-responsive">
-        <table class="table table-sm table-bordered align-middle">
-          <thead class="table-light">
-            <tr>
-              <th>SKU Variação</th>
-              <th>Atributo</th>
-              <th>Valor</th>
-              <th>Ativo</th>
-            </tr>
+    <!-- Variações -->
+    <div class="stq-card">
+      <div class="stq-card-header">Variações</div>
+      <div class="stq-card-body" style="padding: 0;">
+        <table class="stq-table">
+          <thead>
+            <tr><th>SKU Variação</th><th>Atributo</th><th>Valor</th><th>Status</th></tr>
           </thead>
           <tbody>
             <tr th:each="v : ${produto.variacoes}">
-              <td><code th:text="${v.skuVariacao}"></code></td>
+              <td><span class="stq-code" th:text="${v.skuVariacao}"></span></td>
               <td th:text="${v.atributo}"></td>
               <td th:text="${v.valor}"></td>
               <td>
-                <span class="badge"
-                      th:classappend="${v.ativo} ? 'bg-success' : 'bg-secondary'"
-                      th:text="${v.ativo} ? 'Ativa' : 'Inativa'"></span>
+                <span class="stq-badge"
+                      th:classappend="${v.ativo} ? 'stq-badge-success' : 'stq-badge-default'">
+                  <span class="stq-badge-dot"></span>
+                  <span th:text="${v.ativo} ? 'Ativa' : 'Inativa'"></span>
+                </span>
               </td>
             </tr>
             <tr th:if="${produto.variacoes.empty}">
-              <td colspan="4" class="text-center text-muted">Nenhuma variação cadastrada.</td>
+              <td colspan="4">
+                <div class="stq-empty">
+                  <p class="stq-empty-title">Nenhuma variação cadastrada</p>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <!-- Form: adicionar variação -->
-      <div sec:authorize="hasAnyRole('ADMIN','OPERADOR')" class="mt-3">
-        <h6>Adicionar Variação</h6>
+      <div class="stq-card-body" sec:authorize="hasAnyRole('ADMIN','OPERADOR')"
+           style="border-top: 1px solid var(--stq-border);">
+        <p style="font-size: 13px; font-weight: 600; margin-bottom: 12px;">Adicionar Variação</p>
         <form th:action="@{/web/produtos/{id}/variacoes(id=${produto.id})}" method="post"
-              class="row g-2">
-          <div class="col-md-4">
-            <input type="text" name="atributo" class="form-control"
-                   placeholder="Atributo (ex: Cor)" required maxlength="60" />
-          </div>
-          <div class="col-md-4">
-            <input type="text" name="valor" class="form-control"
-                   placeholder="Valor (ex: Azul)" required maxlength="120" />
-          </div>
-          <div class="col-md-2">
-            <button type="submit" class="btn btn-primary w-100">Adicionar</button>
-          </div>
+              class="d-flex gap-2 flex-wrap">
+          <input type="text" name="atributo" class="stq-input" placeholder="Atributo (ex: Cor)"
+                 required maxlength="60" style="flex:1; min-width: 160px;" />
+          <input type="text" name="valor" class="stq-input" placeholder="Valor (ex: Azul)"
+                 required maxlength="120" style="flex:1; min-width: 160px;" />
+          <button type="submit" class="stq-btn stq-btn-primary">Adicionar</button>
         </form>
       </div>
     </div>
-  </div>
 
-  <a th:href="@{/web/produtos}" class="btn btn-outline-secondary">Voltar</a>
+    <div style="margin-top: 16px;">
+      <a th:href="@{/web/produtos}" class="stq-btn stq-btn-outline stq-btn-sm">
+        <i data-lucide="arrow-left" class="stq-icon"></i> Voltar
+      </a>
+    </div>
+  </main>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmqXDsK8VZMu6Z+9ZWAgFRjh1Ah2"
-        crossorigin="anonymous"></script>
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmqXDsK8VZMu6Z+9ZWAgFRjh1Ah2" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
 </body>
 </html>

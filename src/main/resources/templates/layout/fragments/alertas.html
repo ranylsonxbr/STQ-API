@@ -2,17 +2,19 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 <div th:fragment="alertas">
-  <div class="alert alert-success alert-dismissible fade show"
-       role="alert"
-       th:if="${sucesso}"
-       th:text="${sucesso}">
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  <div class="stq-alert stq-alert-success" th:if="${sucesso}">
+    <i data-lucide="check-circle" class="stq-icon"></i>
+    <span th:text="${sucesso}"></span>
+    <button class="stq-alert-dismiss" type="button" onclick="this.parentElement.remove()">
+      <i data-lucide="x" class="stq-icon"></i>
+    </button>
   </div>
-  <div class="alert alert-danger alert-dismissible fade show"
-       role="alert"
-       th:if="${erro}"
-       th:text="${erro}">
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  <div class="stq-alert stq-alert-danger" th:if="${erro}">
+    <i data-lucide="alert-circle" class="stq-icon"></i>
+    <span th:text="${erro}"></span>
+    <button class="stq-alert-dismiss" type="button" onclick="this.parentElement.remove()">
+      <i data-lucide="x" class="stq-icon"></i>
+    </button>
   </div>
 </div>
 </body>

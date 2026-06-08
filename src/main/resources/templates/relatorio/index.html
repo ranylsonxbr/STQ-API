@@ -1,66 +1,96 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      lang="pt-BR">
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>estoque-ai — Relatórios</title>
-  <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-        crossorigin="anonymous" />
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stq — Relatórios</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+  <link rel="stylesheet" th:href="@{/css/app.css}" />
 </head>
-<body>
+<body class="stq-layout">
 
-<div th:replace="~{layout/base :: navbar}"></div>
+<aside th:replace="~{layout/base :: sidebar('relatorios')}"></aside>
 
-<div class="container mt-4">
-  <h2 class="mb-4">Relatórios</h2>
+<div class="stq-main">
+  <header class="stq-topbar">
+    <span class="stq-topbar-title">Relatórios</span>
+  </header>
 
-  <div th:replace="~{layout/fragments/alertas :: alertas}"></div>
+  <main class="stq-content">
+    <div th:replace="~{layout/fragments/alertas :: alertas}"></div>
 
-  <div class="row g-4">
-    <div class="col-md-6">
-      <div class="card h-100">
-        <div class="card-body">
-          <h5 class="card-title">Estoque Atual</h5>
-          <p class="card-text text-muted">Visão consolidada do saldo atual de todos os produtos.</p>
-          <a th:href="@{/web/relatorios/estoque}" class="btn btn-outline-primary">Ver Relatório</a>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="stq-card" style="height: 100%;">
+          <div class="stq-card-body">
+            <div class="d-flex align-items-start gap-3">
+              <i data-lucide="layers" style="width:24px;height:24px;color:var(--stq-primary);flex-shrink:0;margin-top:2px;"></i>
+              <div>
+                <p style="font-size:15px;font-weight:600;margin-bottom:4px;">Estoque Atual</p>
+                <p style="font-size:13px;color:var(--stq-muted);margin-bottom:12px;">Visão consolidada do saldo atual de todos os produtos.</p>
+                <a th:href="@{/web/relatorios/estoque}" class="stq-btn stq-btn-outline stq-btn-sm">
+                  <i data-lucide="arrow-right" class="stq-icon"></i> Ver Relatório
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="stq-card" style="height: 100%;">
+          <div class="stq-card-body">
+            <div class="d-flex align-items-start gap-3">
+              <i data-lucide="alert-triangle" style="width:24px;height:24px;color:#D97706;flex-shrink:0;margin-top:2px;"></i>
+              <div>
+                <p style="font-size:15px;font-weight:600;margin-bottom:4px;">Alertas de Estoque</p>
+                <p style="font-size:13px;color:var(--stq-muted);margin-bottom:12px;">Produtos zerados ou abaixo do estoque mínimo.</p>
+                <a th:href="@{/web/relatorios/alertas}" class="stq-btn stq-btn-outline stq-btn-sm">
+                  <i data-lucide="arrow-right" class="stq-icon"></i> Ver Alertas
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="stq-card" style="height: 100%;">
+          <div class="stq-card-body">
+            <div class="d-flex align-items-start gap-3">
+              <i data-lucide="arrow-left-right" style="width:24px;height:24px;color:var(--stq-primary);flex-shrink:0;margin-top:2px;"></i>
+              <div>
+                <p style="font-size:15px;font-weight:600;margin-bottom:4px;">Movimentações</p>
+                <p style="font-size:13px;color:var(--stq-muted);margin-bottom:12px;">Histórico de entradas, saídas, transferências e ajustes por período.</p>
+                <a th:href="@{/web/relatorios/movimentacoes}" class="stq-btn stq-btn-outline stq-btn-sm">
+                  <i data-lucide="arrow-right" class="stq-icon"></i> Ver Relatório
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="stq-card" style="height: 100%;">
+          <div class="stq-card-body">
+            <div class="d-flex align-items-start gap-3">
+              <i data-lucide="clipboard-list" style="width:24px;height:24px;color:var(--stq-primary);flex-shrink:0;margin-top:2px;"></i>
+              <div>
+                <p style="font-size:15px;font-weight:600;margin-bottom:4px;">Pedidos de Compra</p>
+                <p style="font-size:13px;color:var(--stq-muted);margin-bottom:12px;">Resumo de pedidos por período e status.</p>
+                <a th:href="@{/web/relatorios/pedidos}" class="stq-btn stq-btn-outline stq-btn-sm">
+                  <i data-lucide="arrow-right" class="stq-icon"></i> Ver Relatório
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    <div class="col-md-6">
-      <div class="card h-100">
-        <div class="card-body">
-          <h5 class="card-title">Alertas de Estoque</h5>
-          <p class="card-text text-muted">Produtos zerados ou abaixo do estoque mínimo.</p>
-          <a th:href="@{/web/relatorios/alertas}" class="btn btn-outline-danger">Ver Alertas</a>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-6">
-      <div class="card h-100">
-        <div class="card-body">
-          <h5 class="card-title">Movimentações</h5>
-          <p class="card-text text-muted">Histórico de entradas, saídas, transferências e ajustes por período.</p>
-          <a th:href="@{/web/relatorios/movimentacoes}" class="btn btn-outline-secondary">Ver Relatório</a>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-6">
-      <div class="card h-100">
-        <div class="card-body">
-          <h5 class="card-title">Pedidos de Compra</h5>
-          <p class="card-text text-muted">Resumo de pedidos por período e status.</p>
-          <a th:href="@{/web/relatorios/pedidos}" class="btn btn-outline-warning">Ver Relatório</a>
-        </div>
-      </div>
-    </div>
-  </div>
+  </main>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmqXDsK8VZMu6Z+9ZWAgFRjh1Ah2"
-        crossorigin="anonymous"></script>
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmqXDsK8VZMu6Z+9ZWAgFRjh1Ah2" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
 </body>
 </html>
