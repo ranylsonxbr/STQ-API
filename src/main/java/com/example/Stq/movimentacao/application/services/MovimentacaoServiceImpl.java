@@ -3,6 +3,7 @@ package com.example.Stq.movimentacao.application.services;
 import com.example.Stq.autenticacao.domain.Usuario;
 import com.example.Stq.autenticacao.domain.UsuarioRepository;
 import com.example.Stq.movimentacao.application.dto.AjusteRequest;
+import com.example.Stq.movimentacao.application.dto.EntradaPedidoComando;
 import com.example.Stq.movimentacao.application.dto.EntradaRequest;
 import com.example.Stq.movimentacao.application.dto.MovimentacaoResponse;
 import com.example.Stq.movimentacao.application.dto.SaidaRequest;
@@ -37,6 +38,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MovimentacaoServiceImpl implements MovimentacaoService {
 
+    private static final String LOCALIZACAO_PADRAO = "PADRAO";
+
     private final EstoqueRepository estoqueRepository;
     private final MovimentacaoRepository movimentacaoRepository;
     private final ProdutoRepository produtoRepository;
@@ -58,6 +61,23 @@ public class MovimentacaoServiceImpl implements MovimentacaoService {
         return MovimentacaoResponse.de(gravarMovimentacao(
                 produto, variacao, TipoMovimentacao.ENTRADA, OrigemMovimentacao.MANUAL,
                 req.quantidade(), antes, depois, req.observacao(), usuarioId));
+    }
+
+    @Override
+    @Transactional
+    public MovimentacaoResponse registrarEntradaPorPedido(EntradaPedidoComando cmd, UUID usuarioId) {
+        Produto produto = carregarProduto(cmd.produtoId());
+        VariacaoProduto variacao = carregarVariacaoOpcional(cmd.variacaoId(), produto.getId());
+        Estoque estoque = obterOuCriarEstoque(produto, variacao, LOCALIZACAO_PADRAO);
+
+        int antes = estoque.getSaldoAtual();
+        int depois = antes + cmd.quantidade();
+        estoque.setSaldoAtual(depois);
+        estoqueRepository.save(estoque);
+
+        return MovimentacaoResponse.de(gravarMovimentacao(
+                produto, variacao, TipoMovimentacao.ENTRADA, OrigemMovimentacao.PEDIDO_COMPRA,
+                cmd.quantidade(), antes, depois, cmd.observacao(), usuarioId));
     }
 
     @Override
