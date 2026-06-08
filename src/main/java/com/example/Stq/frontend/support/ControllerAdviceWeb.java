@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.servlet.ModelAndView;
 
+import org.springframework.beans.propertyeditors.StringTrimmerEditor;
+
 import java.beans.PropertyEditorSupport;
 import java.util.UUID;
 
@@ -21,6 +23,7 @@ public class ControllerAdviceWeb {
 
     @InitBinder
     public void initBinder(WebDataBinder binder) {
+        binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
         binder.registerCustomEditor(UUID.class, new PropertyEditorSupport() {
             @Override
             public void setAsText(String text) {
