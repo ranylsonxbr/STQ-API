@@ -173,6 +173,7 @@
 										<include>com.example.Stq.movimentacao.application.*</include>
 										<include>com.example.Stq.pedidocompra.domain.*</include>
 										<include>com.example.Stq.pedidocompra.application.*</include>
+										<include>com.example.Stq.relatorio.application.*</include>
 									</includes>
 									<limits>
 										<limit>
