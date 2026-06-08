@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stq — Relatório: Pedidos de Compra</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+  <link rel="stylesheet" th:href="@{/css/app.css}" />
+</head>
+<body class="stq-layout">
+
+<aside th:replace="~{layout/base :: sidebar('relatorios')}"></aside>
+
+<div class="stq-main">
+  <header class="stq-topbar">
+    <nav class="stq-topbar-breadcrumb">
+      <a th:href="@{/web/relatorios}">Relatórios</a>
+      <span class="sep">/</span>
+      <span class="cur">Pedidos de Compra</span>
+    </nav>
+  </header>
+
+  <main class="stq-content">
+    <div th:replace="~{layout/fragments/alertas :: alertas}"></div>
+
+    <form th:action="@{/web/relatorios/pedidos}" method="get" class="stq-filter-bar">
+      <div>
+        <label class="stq-label" style="margin-bottom:4px;">De</label>
+        <input type="date" name="de" class="stq-input" th:value="${filtroDe}" style="width:160px;" />
+      </div>
+      <div>
+        <label class="stq-label" style="margin-bottom:4px;">Até</label>
+        <input type="date" name="ate" class="stq-input" th:value="${filtroAte}" style="width:160px;" />
+      </div>
+      <div>
+        <label class="stq-label" style="margin-bottom:4px;">Status</label>
+        <select name="status" class="stq-select" style="width:160px;">
+          <option value="">Todos</option>
+          <option th:each="s : ${statusPedido}" th:value="${s.name()}" th:text="${s.name()}"
+                  th:selected="${filtroStatus != null and filtroStatus == s.name()}"></option>
+        </select>
+      </div>
+      <div style="align-self:flex-end;">
+        <button type="submit" class="stq-btn stq-btn-outline">Filtrar</button>
+      </div>
+      <div style="align-self:flex-end;">
+        <a th:href="@{/web/relatorios/pedidos}" class="stq-btn stq-btn-ghost">Limpar</a>
+      </div>
+    </form>
+
+    <div class="stq-alert stq-alert-info"
+         th:if="${relatorio != null and relatorio.totalGasto() != null}">
+      <i data-lucide="info" class="stq-icon"></i>
+      Total gasto no período: <strong>R$ <span th:text="${#numbers.formatDecimal(relatorio.totalGasto(), 1, 2)}"></span></strong>
+    </div>
+
+    <div class="stq-table-wrap" th:if="${relatorio != null}">
+      <table class="stq-table">
+        <thead>
+          <tr><th>Fornecedor</th><th>Status</th><th>Data Emissão</th><th>Total</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr th:each="p : ${relatorio.dados()}">
+            <td th:text="${p.fornecedorNome}"></td>
+            <td>
+              <span class="stq-badge"
+                    th:classappend="${p.status == 'RASCUNHO'} ? 'stq-badge-default' :
+                                    (${p.status == 'PENDENTE'} ? 'stq-badge-warning' :
+                                    (${p.status == 'APROVADO'} ? 'stq-badge-primary' :
+                                    (${p.status == 'RECEBIDO'} ? 'stq-badge-success' : 'stq-badge-danger')))">
+                <span class="stq-badge-dot"></span>
+                <span th:text="${p.status}"></span>
+              </span>
+            </td>
+            <td th:text="${p.dataEmissao}"></td>
+            <td>R$ <span th:text="${#numbers.formatDecimal(p.totalPedido, 1, 2)}"></span></td>
+            <td>
+              <div class="stq-row-actions">
+                <a th:href="@{/web/pedidos/{id}(id=${p.id})}" class="stq-btn stq-btn-ghost stq-btn-sm">
+                  <i data-lucide="eye" class="stq-icon"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+          <tr th:if="${relatorio.dados().empty}">
+            <td colspan="5">
+              <div class="stq-empty"><p class="stq-empty-title">Nenhum pedido no período</p></div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmqXDsK8VZMu6Z+9ZWAgFRjh1Ah2" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

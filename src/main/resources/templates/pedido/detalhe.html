@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="pt-BR">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stq — Pedido de Compra</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+  <link rel="stylesheet" th:href="@{/css/app.css}" />
+</head>
+<body class="stq-layout">
+
+<aside th:replace="~{layout/base :: sidebar('pedidos')}"></aside>
+
+<div class="stq-main">
+  <header class="stq-topbar">
+    <nav class="stq-topbar-breadcrumb">
+      <a th:href="@{/web/pedidos}">Pedidos</a>
+      <span class="sep">/</span>
+      <span class="cur">Detalhe</span>
+    </nav>
+    <span class="stq-badge"
+          th:classappend="${pedido.status.name() == 'RASCUNHO'} ? 'stq-badge-default' :
+                          (${pedido.status.name() == 'PENDENTE'} ? 'stq-badge-warning' :
+                          (${pedido.status.name() == 'APROVADO'} ? 'stq-badge-primary' :
+                          (${pedido.status.name() == 'RECEBIDO'} ? 'stq-badge-success' : 'stq-badge-danger')))">
+      <span class="stq-badge-dot"></span>
+      <span th:text="${pedido.status}"></span>
+    </span>
+  </header>
+
+  <main class="stq-content">
+    <div th:replace="~{layout/fragments/alertas :: alertas}"></div>
+
+    <div class="stq-card mb-3">
+      <div class="stq-card-header">Informações do Pedido</div>
+      <div class="stq-card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <dl class="stq-dl">
+              <dt>Fornecedor</dt>        <dd th:text="${pedido.fornecedorNome}"></dd>
+              <dt>Data de Emissão</dt>   <dd th:text="${pedido.dataEmissao}"></dd>
+              <dt>Previsão Entrega</dt>  <dd th:text="${pedido.dataPrevisaoEntrega} ?: '—'"></dd>
+            </dl>
+          </div>
+          <div class="col-md-6">
+            <dl class="stq-dl">
+              <dt>Total do Pedido</dt>
+              <dd>R$ <span th:text="${#numbers.formatDecimal(pedido.totalPedido, 1, 2)}"></span></dd>
+              <dt>Criado Em</dt>
+              <dd th:text="${#temporals.format(pedido.criadoEm, 'dd/MM/yyyy HH:mm')}"></dd>
+              <dt>Observação</dt>        <dd th:text="${pedido.observacao} ?: '—'"></dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ações por status -->
+    <div class="d-flex flex-wrap gap-2 mb-3" sec:authorize="hasAnyRole('ADMIN','OPERADOR')">
+      <th:block th:if="${pedido.status.name() == 'RASCUNHO'}">
+        <form th:action="@{/web/pedidos/{id}/enviar(id=${pedido.id})}" method="post" class="d-inline">
+          <button type="submit" class="stq-btn stq-btn-primary"
+                  onclick="return confirm('Enviar para aprovação?')">
+            <i data-lucide="send" class="stq-icon"></i> Enviar para Aprovação
+          </button>
+        </form>
+        <form th:action="@{/web/pedidos/{id}/cancelar(id=${pedido.id})}" method="post" class="d-inline">
+          <button type="submit" class="stq-btn stq-btn-outline"
+                  onclick="return confirm('Cancelar este pedido?')">Cancelar</button>
+        </form>
+      </th:block>
+      <th:block th:if="${pedido.status.name() == 'PENDENTE'}">
+        <form th:action="@{/web/pedidos/{id}/aprovar(id=${pedido.id})}" method="post" class="d-inline"
+              sec:authorize="hasRole('ADMIN')">
+          <button type="submit" class="stq-btn stq-btn-primary"
+                  onclick="return confirm('Aprovar este pedido?')">
+            <i data-lucide="check" class="stq-icon"></i> Aprovar
+          </button>
+        </form>
+        <form th:action="@{/web/pedidos/{id}/cancelar(id=${pedido.id})}" method="post" class="d-inline">
+          <button type="submit" class="stq-btn stq-btn-outline"
+                  onclick="return confirm('Cancelar este pedido?')">Cancelar</button>
+        </form>
+      </th:block>
+      <th:block th:if="${pedido.status.name() == 'APROVADO'}">
+        <form th:action="@{/web/pedidos/{id}/receber(id=${pedido.id})}" method="post" class="d-inline">
+          <button type="submit" class="stq-btn stq-btn-primary"
+                  onclick="return confirm('Confirmar recebimento e registrar entradas no estoque?')">
+            <i data-lucide="package-check" class="stq-icon"></i> Confirmar Recebimento
+          </button>
+        </form>
+      </th:block>
+    </div>
+
+    <!-- Itens -->
+    <div class="stq-card mb-3">
+      <div class="stq-card-header">Itens do Pedido</div>
+      <div style="padding: 0;">
+        <table class="stq-table">
+          <thead>
+            <tr>
+              <th>SKU</th><th>Quantidade</th><th>Preço Unitário</th><th>Subtotal</th>
+              <th th:if="${pedido.status.name() == 'RASCUNHO'}" sec:authorize="hasAnyRole('ADMIN','OPERADOR')"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="item : ${pedido.itens}">
+              <td><span class="stq-code" th:text="${item.produtoSku}"></span></td>
+              <td th:text="${item.quantidade}"></td>
+              <td>R$ <span th:text="${#numbers.formatDecimal(item.precoUnitario, 1, 2)}"></span></td>
+              <td>R$ <span th:text="${#numbers.formatDecimal(item.subtotal, 1, 2)}"></span></td>
+              <td th:if="${pedido.status.name() == 'RASCUNHO'}" sec:authorize="hasAnyRole('ADMIN','OPERADOR')">
+                <div class="stq-row-actions">
+                  <form th:action="@{/web/pedidos/{id}/itens/{itemId}/remover(id=${pedido.id},itemId=${item.id})}"
+                        method="post" onsubmit="return confirm('Remover este item?')" class="d-inline">
+                    <button type="submit" class="stq-btn stq-btn-ghost stq-btn-sm">
+                      <i data-lucide="trash-2" class="stq-icon"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            <tr th:if="${pedido.itens.empty}">
+              <td colspan="5">
+                <div class="stq-empty"><p class="stq-empty-title">Nenhum item adicionado</p></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Adicionar item (somente RASCUNHO) -->
+    <div class="stq-card" th:if="${pedido.status.name() == 'RASCUNHO'}"
+         sec:authorize="hasAnyRole('ADMIN','OPERADOR')">
+      <div class="stq-card-header">Adicionar Item</div>
+      <div class="stq-card-body">
+        <form th:action="@{/web/pedidos/{id}/itens(id=${pedido.id})}"
+              th:object="${itemPedidoForm}" method="post" novalidate>
+          <div class="d-flex gap-2 flex-wrap align-items-end">
+            <div style="flex:2; min-width:200px;">
+              <label for="itemProdutoId" class="stq-label">Produto <span class="stq-req">*</span></label>
+              <select id="itemProdutoId" name="produtoId" class="stq-select"
+                      th:classappend="${#fields.hasErrors('produtoId')} ? ' is-invalid'" required>
+                <option value="">Selecione...</option>
+                <option th:each="p : ${produtos}" th:value="${p.id}"
+                        th:text="${p.sku + ' — ' + p.nome}"></option>
+              </select>
+            </div>
+            <div style="flex:1; min-width:100px;">
+              <label for="itemQuantidade" class="stq-label">Qtd. <span class="stq-req">*</span></label>
+              <input type="number" id="itemQuantidade" name="quantidade" class="stq-input"
+                     th:field="*{quantidade}" min="1" required />
+            </div>
+            <div style="flex:1; min-width:120px;">
+              <label for="itemPreco" class="stq-label">Preço Unit. <span class="stq-req">*</span></label>
+              <input type="number" id="itemPreco" name="precoUnitario" class="stq-input"
+                     th:field="*{precoUnitario}" min="0.01" step="0.01" required />
+            </div>
+            <button type="submit" class="stq-btn stq-btn-primary">
+              <i data-lucide="plus" class="stq-icon"></i> Adicionar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div style="margin-top: 16px;">
+      <a th:href="@{/web/pedidos}" class="stq-btn stq-btn-outline stq-btn-sm">
+        <i data-lucide="arrow-left" class="stq-icon"></i> Voltar
+      </a>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmqXDsK8VZMu6Z+9ZWAgFRjh1Ah2" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

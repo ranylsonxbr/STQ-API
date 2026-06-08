@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<!--
+  Padrão de layout: FRAGMENTOS THYMELEAF NATIVOS (sem thymeleaf-layout-dialect).
+  Fragmento principal: sidebar(moduloAtivo)
+  Uso em cada página:
+    <aside th:replace="~{layout/base :: sidebar('produtos')}"></aside>
+  Módulos: dashboard, produtos, fornecedores, movimentacoes, pedidos, relatorios, usuarios
+-->
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<aside th:fragment="sidebar(moduloAtivo)" class="stq-sidebar">
+
+  <a th:href="@{/web/dashboard}" class="stq-sidebar-logo">
+    <span class="stq-logo-mark">S</span>
+    <span class="stq-logo-name">Stq</span>
+  </a>
+
+  <nav class="stq-sidebar-nav">
+
+    <div class="stq-nav-section">
+      <span class="stq-nav-label">Operação</span>
+    </div>
+
+    <a th:href="@{/web/dashboard}"
+       th:class="'stq-nav-item' + (${moduloAtivo == 'dashboard'} ? ' active' : '')">
+      <i data-lucide="layout-dashboard" class="stq-icon"></i>
+      <span>Dashboard</span>
+    </a>
+
+    <a th:href="@{/web/produtos}"
+       th:class="'stq-nav-item' + (${moduloAtivo == 'produtos'} ? ' active' : '')">
+      <i data-lucide="package" class="stq-icon"></i>
+      <span>Produtos</span>
+    </a>
+
+    <a th:href="@{/web/fornecedores}"
+       th:class="'stq-nav-item' + (${moduloAtivo == 'fornecedores'} ? ' active' : '')">
+      <i data-lucide="building-2" class="stq-icon"></i>
+      <span>Fornecedores</span>
+    </a>
+
+    <a th:href="@{/web/movimentacoes}"
+       th:class="'stq-nav-item' + (${moduloAtivo == 'movimentacoes'} ? ' active' : '')">
+      <i data-lucide="arrow-left-right" class="stq-icon"></i>
+      <span>Movimentações</span>
+    </a>
+
+    <a th:href="@{/web/pedidos}"
+       th:class="'stq-nav-item' + (${moduloAtivo == 'pedidos'} ? ' active' : '')">
+      <i data-lucide="clipboard-list" class="stq-icon"></i>
+      <span>Pedidos de Compra</span>
+    </a>
+
+    <div class="stq-nav-section">
+      <span class="stq-nav-label">Análise</span>
+    </div>
+
+    <a th:href="@{/web/relatorios}"
+       th:class="'stq-nav-item' + (${moduloAtivo == 'relatorios'} ? ' active' : '')">
+      <i data-lucide="bar-chart-2" class="stq-icon"></i>
+      <span>Relatórios</span>
+    </a>
+
+    <th:block sec:authorize="hasRole('ADMIN')">
+      <div class="stq-nav-section">
+        <span class="stq-nav-label">Administração</span>
+      </div>
+      <a th:href="@{/web/usuarios}"
+         th:class="'stq-nav-item' + (${moduloAtivo == 'usuarios'} ? ' active' : '')">
+        <i data-lucide="users" class="stq-icon"></i>
+        <span>Usuários</span>
+      </a>
+    </th:block>
+
+  </nav>
+
+  <div class="stq-sidebar-footer">
+    <div class="stq-avatar"
+         th:text="${nomeUsuario != null and #strings.length(nomeUsuario) >= 2 ? #strings.toUpperCase(#strings.substring(nomeUsuario, 0, 2)) : 'U'}">U</div>
+    <div class="stq-footer-info">
+      <div class="stq-footer-name" th:text="${nomeUsuario} ?: 'Usuário'">Usuário</div>
+      <div class="stq-footer-role" th:text="${perfilUsuario} ?: ''"></div>
+    </div>
+    <form th:action="@{/web/logout}" method="post">
+      <button type="submit" class="stq-logout-btn" title="Sair">
+        <i data-lucide="log-out" class="stq-icon"></i>
+      </button>
+    </form>
+  </div>
+
+</aside>
+
+</body>
+</html>

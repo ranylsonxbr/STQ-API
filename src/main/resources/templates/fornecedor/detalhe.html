@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="pt-BR">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stq — Fornecedor</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+  <link rel="stylesheet" th:href="@{/css/app.css}" />
+</head>
+<body class="stq-layout">
+
+<aside th:replace="~{layout/base :: sidebar('fornecedores')}"></aside>
+
+<div class="stq-main">
+  <header class="stq-topbar">
+    <nav class="stq-topbar-breadcrumb">
+      <a th:href="@{/web/fornecedores}">Fornecedores</a>
+      <span class="sep">/</span>
+      <span class="cur" th:text="${fornecedor.razaoSocial}"></span>
+    </nav>
+    <div class="d-flex gap-2" sec:authorize="hasAnyRole('ADMIN','OPERADOR')">
+      <a th:href="@{/web/fornecedores/{id}/editar(id=${fornecedor.id})}" class="stq-btn stq-btn-outline stq-btn-sm">
+        <i data-lucide="edit-2" class="stq-icon"></i> Editar
+      </a>
+      <form th:action="@{/web/fornecedores/{id}/desativar(id=${fornecedor.id})}" method="post"
+            th:if="${fornecedor.ativo}" onsubmit="return confirm('Desativar este fornecedor?')" class="d-inline">
+        <button type="submit" class="stq-btn stq-btn-danger-soft stq-btn-sm">
+          <i data-lucide="ban" class="stq-icon"></i> Desativar
+        </button>
+      </form>
+      <form th:action="@{/web/fornecedores/{id}/reativar(id=${fornecedor.id})}" method="post"
+            th:if="${!fornecedor.ativo}" class="d-inline">
+        <button type="submit" class="stq-btn stq-btn-outline stq-btn-sm">Reativar</button>
+      </form>
+    </div>
+  </header>
+
+  <main class="stq-content">
+    <div th:replace="~{layout/fragments/alertas :: alertas}"></div>
+
+    <div class="stq-card" style="max-width: 640px; margin: 0 auto;">
+      <div class="stq-card-header" th:text="${fornecedor.razaoSocial}"></div>
+      <div class="stq-card-body">
+        <dl class="stq-dl">
+          <dt>CNPJ</dt>        <dd th:text="${fornecedor.cnpj}"></dd>
+          <dt>E-mail</dt>      <dd th:text="${fornecedor.email} ?: '—'"></dd>
+          <dt>Telefone</dt>    <dd th:text="${fornecedor.telefone} ?: '—'"></dd>
+          <dt>Contato</dt>     <dd th:text="${fornecedor.contato} ?: '—'"></dd>
+          <dt>Status</dt>
+          <dd>
+            <span class="stq-badge" th:classappend="${fornecedor.ativo} ? 'stq-badge-success' : 'stq-badge-default'">
+              <span class="stq-badge-dot"></span>
+              <span th:text="${fornecedor.ativo} ? 'Ativo' : 'Inativo'"></span>
+            </span>
+          </dd>
+          <dt>Criado em</dt>   <dd th:text="${#temporals.format(fornecedor.criadoEm, 'dd/MM/yyyy HH:mm')}"></dd>
+          <dt th:if="${fornecedor.atualizadoEm != null}">Atualizado em</dt>
+          <dd th:if="${fornecedor.atualizadoEm != null}"
+              th:text="${#temporals.format(fornecedor.atualizadoEm, 'dd/MM/yyyy HH:mm')}"></dd>
+        </dl>
+      </div>
+    </div>
+
+    <div style="margin-top: 16px;">
+      <a th:href="@{/web/fornecedores}" class="stq-btn stq-btn-outline stq-btn-sm">
+        <i data-lucide="arrow-left" class="stq-icon"></i> Voltar
+      </a>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmqXDsK8VZMu6Z+9ZWAgFRjh1Ah2" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

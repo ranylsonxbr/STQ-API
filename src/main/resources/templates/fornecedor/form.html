@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title th:text="${editando} ? 'Stq — Editar Fornecedor' : 'Stq — Novo Fornecedor'">Stq — Fornecedor</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+  <link rel="stylesheet" th:href="@{/css/app.css}" />
+</head>
+<body class="stq-layout">
+
+<aside th:replace="~{layout/base :: sidebar('fornecedores')}"></aside>
+
+<div class="stq-main">
+  <header class="stq-topbar">
+    <nav class="stq-topbar-breadcrumb">
+      <a th:href="@{/web/fornecedores}">Fornecedores</a>
+      <span class="sep">/</span>
+      <span class="cur" th:text="${editando} ? 'Editar Fornecedor' : 'Novo Fornecedor'"></span>
+    </nav>
+  </header>
+
+  <main class="stq-content">
+    <div th:replace="~{layout/fragments/alertas :: alertas}"></div>
+
+    <div class="stq-card" style="max-width: 640px; margin: 0 auto;">
+      <div class="stq-card-header" th:text="${editando} ? 'Editar Fornecedor' : 'Informações do fornecedor'"></div>
+      <div class="stq-card-body">
+        <form th:action="${editando} ? @{/web/fornecedores/{id}(id=${fornecedorId})} : @{/web/fornecedores}"
+              th:object="${fornecedorForm}" method="post" novalidate>
+
+          <div class="stq-form-grid">
+            <div class="stq-form-group stq-form-full">
+              <label for="razaoSocial" class="stq-label">Razão Social <span class="stq-req">*</span></label>
+              <input type="text" id="razaoSocial" name="razaoSocial" class="stq-input"
+                     th:field="*{razaoSocial}"
+                     th:classappend="${#fields.hasErrors('razaoSocial')} ? ' is-invalid'"
+                     required minlength="3" maxlength="150" />
+              <div class="stq-invalid-msg" th:if="${#fields.hasErrors('razaoSocial')}" th:errors="*{razaoSocial}"></div>
+            </div>
+
+            <div class="stq-form-group">
+              <label for="cnpj" class="stq-label">CNPJ <span class="stq-req">*</span></label>
+              <input type="text" id="cnpj" name="cnpj" class="stq-input"
+                     th:field="*{cnpj}"
+                     th:classappend="${#fields.hasErrors('cnpj')} ? ' is-invalid'"
+                     placeholder="00.000.000/0000-00" required />
+              <div class="stq-invalid-msg" th:if="${#fields.hasErrors('cnpj')}" th:errors="*{cnpj}"></div>
+            </div>
+
+            <div class="stq-form-group">
+              <label for="email" class="stq-label">E-mail</label>
+              <input type="email" id="email" name="email" class="stq-input"
+                     th:field="*{email}"
+                     th:classappend="${#fields.hasErrors('email')} ? ' is-invalid'" />
+              <div class="stq-invalid-msg" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+            </div>
+
+            <div class="stq-form-group">
+              <label for="telefone" class="stq-label">Telefone</label>
+              <input type="text" id="telefone" name="telefone" class="stq-input"
+                     th:field="*{telefone}" />
+            </div>
+
+            <div class="stq-form-group">
+              <label for="contato" class="stq-label">Nome do Contato</label>
+              <input type="text" id="contato" name="contato" class="stq-input"
+                     th:field="*{contato}" />
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center" style="margin-top: 8px;">
+            <a th:href="@{/web/fornecedores}" class="stq-btn-link">Cancelar</a>
+            <button type="submit" class="stq-btn stq-btn-primary">
+              <i data-lucide="save" class="stq-icon"></i>
+              <span th:text="${editando} ? 'Salvar alterações' : 'Criar Fornecedor'">Salvar</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmqXDsK8VZMu6Z+9ZWAgFRjh1Ah2" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

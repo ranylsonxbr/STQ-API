@@ -1,7 +1,7 @@
 # Web Server
 server:
   servlet:
-    context-path: /stq/api
+    context-path: /estoque-ai
 
 # Logging
 logging:

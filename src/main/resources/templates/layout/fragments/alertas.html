@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="alertas">
+  <div class="stq-alert stq-alert-success" th:if="${sucesso}">
+    <i data-lucide="check-circle" class="stq-icon"></i>
+    <span th:text="${sucesso}"></span>
+    <button class="stq-alert-dismiss" type="button" onclick="this.parentElement.remove()">
+      <i data-lucide="x" class="stq-icon"></i>
+    </button>
+  </div>
+  <div class="stq-alert stq-alert-danger" th:if="${erro}">
+    <i data-lucide="alert-circle" class="stq-icon"></i>
+    <span th:text="${erro}"></span>
+    <button class="stq-alert-dismiss" type="button" onclick="this.parentElement.remove()">
+      <i data-lucide="x" class="stq-icon"></i>
+    </button>
+  </div>
+</div>
+</body>
+</html>

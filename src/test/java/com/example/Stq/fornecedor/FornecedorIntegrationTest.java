@@ -43,7 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *   2° dígito: pesos 6,5,4,3,2,9,8,7,6,5,4,3,2 → mesma regra
  *
  * Banco: PostgreSQL localhost:5432/stqdb?currentSchema=stq
- * Context path: /stq/api (configurado em application.yaml)
+ * Context path: /estoque-ai (configurado em application.yaml)
  * Endpoint base do MockMvc: /api/fornecedores (sem context path — MockMvc não usa context path)
  */
 @SpringBootTest
@@ -462,26 +462,26 @@ class FornecedorIntegrationTest {
 
     /**
      * Extrai o path relativo de uma URL completa de Location.
-     * Exemplo: "http://localhost:8080/stq/api/api/fornecedores/uuid" → "/api/fornecedores/uuid"
+     * Exemplo: "http://localhost:8080/estoque-ai/api/fornecedores/uuid" → "/api/fornecedores/uuid"
      * Se a URL não contiver o context path, retorna tudo após a porta.
      */
     private String extrairPathDaLocation(String location) {
         // O MockMvc com RANDOM_PORT pode retornar a URL completa.
-        // Precisamos extrair apenas o path sem o context path (/stq/api),
+        // Precisamos extrair apenas o path sem o context path (/estoque-ai),
         // pois o MockMvc já o inclui implicitamente ao fazer perform().
         if (location == null) return "";
         // Remove protocolo + host + porta
         String semEsquema = location.replaceFirst("https?://[^/]+", "");
-        // Remove context path /stq/api se presente (MockMvc não precisa dele)
-        if (semEsquema.startsWith("/stq/api")) {
-            return semEsquema.substring("/stq/api".length());
+        // Remove context path /estoque-ai se presente (MockMvc não precisa dele)
+        if (semEsquema.startsWith("/estoque-ai")) {
+            return semEsquema.substring("/estoque-ai".length());
         }
         return semEsquema;
     }
 
     /**
      * Extrai o id (UUID como String) do Location header de um resultado de criação.
-     * O Location header tem o formato: http://localhost:{port}/stq/api/api/fornecedores/{uuid}
+     * O Location header tem o formato: http://localhost:{port}/estoque-ai/api/fornecedores/{uuid}
      */
     private String extrairIdDaLocation(MvcResult result) {
         String location = result.getResponse().getHeader("Location");

@@ -6,6 +6,8 @@ import com.example.Stq.produto.domain.Produto;
 import com.example.Stq.produto.domain.ProdutoRepository;
 import com.example.Stq.produto.domain.VariacaoProduto;
 import com.example.Stq.produto.domain.VariacaoProdutoRepository;
+
+import java.util.List;
 import com.example.Stq.produto.domain.exception.ProdutoNotFoundException;
 import com.example.Stq.produto.domain.exception.VariacaoDuplicadaException;
 import com.example.Stq.produto.domain.exception.VariacaoNotFoundException;
@@ -55,5 +57,13 @@ public class VariacaoProdutoServiceImpl implements VariacaoProdutoService {
 
         variacao.setAtivo(false);
         variacaoProdutoRepository.save(variacao);
+    }
+
+    @Override
+    public List<VariacaoResponse> listarAtivasPorProduto(UUID produtoId) {
+        return variacaoProdutoRepository.findAtivasByProdutoId(produtoId)
+                .stream()
+                .map(VariacaoResponse::de)
+                .toList();
     }
 }
