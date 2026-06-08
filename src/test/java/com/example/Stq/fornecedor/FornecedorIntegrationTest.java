@@ -78,6 +78,12 @@ class FornecedorIntegrationTest {
      */
     private static final String CNPJ_I4 = "55666777000181";
 
+    /**
+     * CNPJ usado em FORN-I6 (RN-08).
+     * Calculado manualmente: base 667778880001 → 1°dígito=8, 2°dígito=1 → 66777888000181.
+     */
+    private static final String CNPJ_I6 = "66777888000181";
+
     // -----------------------------------------------------------------------
     // Infraestrutura de teste
     // -----------------------------------------------------------------------
@@ -98,8 +104,12 @@ class FornecedorIntegrationTest {
 
     @AfterEach
     void tearDown() {
-        jdbcTemplate.update("DELETE FROM stq.fornecedor WHERE cnpj IN (?, ?, ?, ?)",
-                CNPJ_I1, CNPJ_I3, CNPJ_I4, CNPJ_I1);
+        jdbcTemplate.update(
+                "DELETE FROM stq.pedido_compra WHERE fornecedor_id IN "
+                + "(SELECT id FROM stq.fornecedor WHERE cnpj IN (?, ?, ?, ?, ?))",
+                CNPJ_I1, CNPJ_I3, CNPJ_I4, CNPJ_I6, CNPJ_I1);
+        jdbcTemplate.update("DELETE FROM stq.fornecedor WHERE cnpj IN (?, ?, ?, ?, ?)",
+                CNPJ_I1, CNPJ_I3, CNPJ_I4, CNPJ_I6, CNPJ_I1);
         jdbcTemplate.update("DELETE FROM stq.usuario WHERE email IN (?, ?)",
                 "admin@teste.com", "operador@teste.com");
     }
@@ -393,6 +403,36 @@ class FornecedorIntegrationTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content").isArray())
                     .andExpect(jsonPath("$.content[?(@.id == '" + idStr + "')]").exists());
+        }
+    }
+
+    @Nested
+    @DisplayName("[FORN-I6] Bloqueio de desativação com pedido em aberto (RN-08)")
+    class BloqueioDesativacaoComPedidoEmAberto {
+
+        @Test
+        @DisplayName("[FORN-I6] deve retornar 409 quando fornecedor tem pedido em aberto (RN-08)")
+        void deveRetornar409QuandoFornecedorTemPedidoEmAberto() throws Exception {
+            MvcResult resultCriacao = mockMvc.perform(post("/api/fornecedores")
+                            .header("Authorization", "Bearer " + tokenAdmin)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(new FornecedorRequest(
+                                    "Fornecedor RN-08 LTDA", CNPJ_I6, null, null, null))))
+                    .andExpect(status().isCreated())
+                    .andReturn();
+
+            String fornecedorId = extrairIdDaLocation(resultCriacao);
+
+            jdbcTemplate.update(
+                    "INSERT INTO stq.pedido_compra "
+                    + "(id, fornecedor_id, status, data_emissao, total_pedido, criado_por, criado_em) "
+                    + "VALUES (gen_random_uuid(), ?::uuid, 'PENDENTE', now(), 0, "
+                    + "(SELECT id FROM stq.usuario WHERE email = 'admin@teste.com'), now())",
+                    fornecedorId);
+
+            mockMvc.perform(delete("/api/fornecedores/" + fornecedorId)
+                            .header("Authorization", "Bearer " + tokenAdmin))
+                    .andExpect(status().isConflict());
         }
     }
 

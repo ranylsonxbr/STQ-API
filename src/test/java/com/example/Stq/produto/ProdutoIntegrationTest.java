@@ -1,9 +1,20 @@
 package com.example.Stq.produto;
 
+import com.example.Stq.autenticacao.domain.Perfil;
+import com.example.Stq.autenticacao.domain.Usuario;
+import com.example.Stq.autenticacao.domain.UsuarioRepository;
+import com.example.Stq.autenticacao.infra.UsuarioJpaRepository;
+import com.example.Stq.fornecedor.domain.Fornecedor;
+import com.example.Stq.fornecedor.infra.FornecedorJpaRepository;
+import com.example.Stq.pedidocompra.domain.ItemPedidoCompra;
+import com.example.Stq.pedidocompra.domain.PedidoCompra;
+import com.example.Stq.pedidocompra.domain.StatusPedido;
+import com.example.Stq.pedidocompra.infra.PedidoCompraJpaRepository;
 import com.example.Stq.produto.application.dto.ProdutoCreateRequest;
 import com.example.Stq.produto.application.dto.ProdutoUpdateRequest;
 import com.example.Stq.produto.application.dto.VariacaoCreateRequest;
 import com.example.Stq.produto.domain.Categoria;
+import com.example.Stq.produto.domain.Produto;
 import com.example.Stq.produto.domain.UnidadeMedida;
 import com.example.Stq.produto.infra.CategoriaJpaRepository;
 import com.example.Stq.produto.infra.ProdutoJpaRepository;
@@ -23,6 +34,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.UUID;
+
 import static org.hamcrest.Matchers.*;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -37,6 +52,9 @@ class ProdutoIntegrationTest {
     @Autowired CategoriaJpaRepository categoriaJpaRepository;
     @Autowired ProdutoJpaRepository produtoJpaRepository;
     @Autowired VariacaoProdutoJpaRepository variacaoProdutoJpaRepository;
+    @Autowired PedidoCompraJpaRepository pedidoCompraJpaRepository;
+    @Autowired FornecedorJpaRepository fornecedorJpaRepository;
+    @Autowired UsuarioJpaRepository usuarioJpaRepository;
 
     private MockMvc mockMvc;
     private final ObjectMapper json = new ObjectMapper().registerModule(new JavaTimeModule());
@@ -47,9 +65,12 @@ class ProdutoIntegrationTest {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac)
                 .apply(springSecurity())
                 .build();
+        pedidoCompraJpaRepository.deleteAll();
         variacaoProdutoJpaRepository.deleteAll();
         produtoJpaRepository.deleteAll();
         categoriaJpaRepository.deleteAll();
+        fornecedorJpaRepository.deleteAll();
+        usuarioJpaRepository.deleteAll();
         categoriaAtiva = categoriaJpaRepository.save(
                 Categoria.builder().nome("Cat Teste").ativo(true).build());
     }
@@ -217,6 +238,34 @@ class ProdutoIntegrationTest {
 
             mockMvc.perform(get("/api/produtos/{id}", id))
                     .andExpect(jsonPath("$.ativo").value(false));
+        }
+
+        @Test
+        @WithMockUser(roles = "ADMIN")
+        @DisplayName("[PROD-I2] deve retornar 409 quando produto tem pedido em aberto (RN-07)")
+        void deveRetornar409ComPedidoEmAberto() throws Exception {
+            String produtoIdStr = criarProdutoERetornarId("Produto RN-07");
+            Produto produto = produtoJpaRepository.findById(UUID.fromString(produtoIdStr)).orElseThrow();
+
+            Fornecedor fornecedor = fornecedorJpaRepository.save(
+                    Fornecedor.builder().razaoSocial("Forn RN07").cnpj("22333444000181").ativo(true).build());
+            Usuario usuario = ((UsuarioRepository) usuarioJpaRepository)
+                    .save(Usuario.builder().nome("admin").email("admin-rn07@test.com")
+                            .senha("hash").perfil(Perfil.ADMIN).ativo(true).build());
+
+            PedidoCompra pedido = PedidoCompra.builder()
+                    .fornecedor(fornecedor).status(StatusPedido.PENDENTE)
+                    .dataEmissao(LocalDate.now()).criadoPor(usuario)
+                    .totalPedido(BigDecimal.TEN).build();
+            ItemPedidoCompra item = ItemPedidoCompra.builder()
+                    .produto(produto).quantidade(1)
+                    .precoUnitario(BigDecimal.TEN).subtotal(BigDecimal.TEN).build();
+            item.setPedidoCompra(pedido);
+            pedido.getItens().add(item);
+            pedidoCompraJpaRepository.save(pedido);
+
+            mockMvc.perform(delete("/api/produtos/{id}", produtoIdStr))
+                    .andExpect(status().isConflict());
         }
     }
 
