@@ -43,6 +43,8 @@ public class SecurityConfig {
                 .securityMatcher("/web/**", "/css/**", "/js/**")
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/web/login", "/web/acesso-negado", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/web/usuarios/registro").permitAll()
+                        .requestMatchers("/web/usuarios/**").hasRole("ADMIN")
                         .requestMatchers("/web/movimentacoes/ajuste/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/web/pedidos/*/aprovar").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/web/produtos/**").hasAnyRole("ADMIN", "OPERADOR")
