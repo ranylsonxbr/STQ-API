@@ -74,7 +74,7 @@ class MovimentacaoWebControllerTest {
     }
 
     private MovimentacaoResponse movimentacaoResponse() {
-        return new MovimentacaoResponse(randomId(), randomId(), "PRD-000001",
+        return new MovimentacaoResponse(randomId(), randomId(), "PRD-000001", "Produto Teste",
                 null, TipoMovimentacao.ENTRADA, OrigemMovimentacao.MANUAL,
                 10, 0, 10, "obs", randomId(), Instant.now());
     }

@@ -123,8 +123,12 @@ public class MovimentacaoWebController {
                 form.quantidade(),
                 form.observacao()
         );
-        movimentacaoService.registrarEntrada(request, usuarioLogado.obterUsuarioId(auth));
-        redirectAttributes.addFlashAttribute("sucesso", "Entrada registrada com sucesso.");
+        try {
+            movimentacaoService.registrarEntrada(request, usuarioLogado.obterUsuarioId(auth));
+            redirectAttributes.addFlashAttribute("sucesso", "Entrada registrada com sucesso.");
+        } catch (RuntimeException ex) {
+            redirectAttributes.addFlashAttribute("erro", ex.getMessage());
+        }
         return "redirect:/web/movimentacoes";
     }
 
@@ -199,8 +203,12 @@ public class MovimentacaoWebController {
                 form.quantidade(),
                 form.observacao()
         );
-        movimentacaoService.registrarTransferencia(request, usuarioLogado.obterUsuarioId(auth));
-        redirectAttributes.addFlashAttribute("sucesso", "Transferência registrada com sucesso.");
+        try {
+            movimentacaoService.registrarTransferencia(request, usuarioLogado.obterUsuarioId(auth));
+            redirectAttributes.addFlashAttribute("sucesso", "Transferência registrada com sucesso.");
+        } catch (RuntimeException ex) {
+            redirectAttributes.addFlashAttribute("erro", ex.getMessage());
+        }
         return "redirect:/web/movimentacoes";
     }
 
@@ -235,8 +243,12 @@ public class MovimentacaoWebController {
                 form.delta(),
                 form.observacao()
         );
-        movimentacaoService.registrarAjuste(request, usuarioLogado.obterUsuarioId(auth));
-        redirectAttributes.addFlashAttribute("sucesso", "Ajuste de inventário registrado com sucesso.");
+        try {
+            movimentacaoService.registrarAjuste(request, usuarioLogado.obterUsuarioId(auth));
+            redirectAttributes.addFlashAttribute("sucesso", "Ajuste de inventário registrado com sucesso.");
+        } catch (RuntimeException ex) {
+            redirectAttributes.addFlashAttribute("erro", ex.getMessage());
+        }
         return "redirect:/web/movimentacoes";
     }
 }

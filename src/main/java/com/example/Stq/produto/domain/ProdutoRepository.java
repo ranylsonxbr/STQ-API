@@ -12,6 +12,8 @@ public interface ProdutoRepository {
     Optional<Produto> findBySkuComVariacoes(String sku);
     Optional<Produto> findBySku(String sku);
     boolean existsByCategoria_IdAndAtivoTrue(UUID categoriaId);
+    boolean existsByNomeIgnoreCase(String nome);
+    boolean existsByNomeIgnoreCaseAndIdNot(String nome, UUID id);
     Page<Produto> findAll(ProdutoFiltro filtro, Pageable pageable);
     Produto save(Produto produto);
 }

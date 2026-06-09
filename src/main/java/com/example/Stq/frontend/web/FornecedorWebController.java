@@ -3,6 +3,9 @@ package com.example.Stq.frontend.web;
 import com.example.Stq.fornecedor.application.dto.FornecedorRequest;
 import com.example.Stq.fornecedor.application.services.FornecedorService;
 import com.example.Stq.fornecedor.domain.FornecedorFiltro;
+import com.example.Stq.fornecedor.domain.exception.CnpjDuplicadoException;
+import com.example.Stq.fornecedor.domain.exception.CnpjInvalidoException;
+import com.example.Stq.fornecedor.domain.exception.EdicaoCnpjNaoPermitidaException;
 import com.example.Stq.frontend.form.FornecedorForm;
 import com.example.Stq.frontend.support.UsuarioLogado;
 import jakarta.validation.Valid;
@@ -77,9 +80,15 @@ public class FornecedorWebController {
                 fornecedorForm.telefone(),
                 fornecedorForm.contato()
         );
-        var response = fornecedorService.criar(request, usuarioId);
-        redirectAttributes.addFlashAttribute("sucesso", "Fornecedor criado com sucesso.");
-        return "redirect:/web/fornecedores/" + response.id();
+        try {
+            var response = fornecedorService.criar(request, usuarioId);
+            redirectAttributes.addFlashAttribute("sucesso", "Fornecedor criado com sucesso.");
+            return "redirect:/web/fornecedores/" + response.id();
+        } catch (CnpjInvalidoException | CnpjDuplicadoException ex) {
+            bindingResult.rejectValue("cnpj", "invalido", ex.getMessage());
+            model.addAttribute("editando", false);
+            return "fornecedor/form";
+        }
     }
 
     @GetMapping("/{id}/editar")
@@ -120,9 +129,16 @@ public class FornecedorWebController {
                 fornecedorForm.telefone(),
                 fornecedorForm.contato()
         );
-        fornecedorService.atualizar(id, request, usuarioId, perfil);
-        redirectAttributes.addFlashAttribute("sucesso", "Fornecedor atualizado com sucesso.");
-        return "redirect:/web/fornecedores/" + id;
+        try {
+            fornecedorService.atualizar(id, request, usuarioId, perfil);
+            redirectAttributes.addFlashAttribute("sucesso", "Fornecedor atualizado com sucesso.");
+            return "redirect:/web/fornecedores/" + id;
+        } catch (CnpjInvalidoException | CnpjDuplicadoException | EdicaoCnpjNaoPermitidaException ex) {
+            bindingResult.rejectValue("cnpj", "invalido", ex.getMessage());
+            model.addAttribute("fornecedorId", id);
+            model.addAttribute("editando", true);
+            return "fornecedor/form";
+        }
     }
 
     @PostMapping("/{id}/desativar")
@@ -145,9 +161,13 @@ public class FornecedorWebController {
             @PathVariable UUID id,
             Authentication auth,
             RedirectAttributes redirectAttributes) {
-        UUID usuarioId = usuarioLogado.obterUsuarioId(auth);
-        fornecedorService.reativar(id, usuarioId);
-        redirectAttributes.addFlashAttribute("sucesso", "Fornecedor reativado com sucesso.");
+        try {
+            UUID usuarioId = usuarioLogado.obterUsuarioId(auth);
+            fornecedorService.reativar(id, usuarioId);
+            redirectAttributes.addFlashAttribute("sucesso", "Fornecedor reativado com sucesso.");
+        } catch (RuntimeException ex) {
+            redirectAttributes.addFlashAttribute("erro", ex.getMessage());
+        }
         return "redirect:/web/fornecedores/" + id;
     }
 }

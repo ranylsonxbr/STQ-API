@@ -13,6 +13,7 @@ import com.example.Stq.produto.domain.exception.CategoriaInativaException;
 import com.example.Stq.produto.domain.exception.CategoriaNotFoundException;
 import com.example.Stq.produto.domain.exception.ProdutoComPedidoEmAbertoException;
 import com.example.Stq.produto.domain.exception.ProdutoNotFoundException;
+import com.example.Stq.produto.domain.exception.ProdutoNomeDuplicadoException;
 import com.example.Stq.produto.domain.exception.SkuColisaoException;
 import com.example.Stq.produto.domain.port.PedidoCompraReadPort;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,9 @@ public class ProdutoServiceImpl implements ProdutoService {
     @Override
     @Transactional
     public ProdutoResponse criar(ProdutoCreateRequest request) {
+        if (produtoRepository.existsByNomeIgnoreCase(request.nome())) {
+            throw new ProdutoNomeDuplicadoException();
+        }
         Categoria categoria = buscarCategoriaAtiva(request.categoriaId());
 
         Produto produto = Produto.builder()
@@ -55,6 +59,9 @@ public class ProdutoServiceImpl implements ProdutoService {
     @Transactional
     public ProdutoResponse atualizar(UUID id, ProdutoUpdateRequest request) {
         Produto produto = buscarOuLancar(id);
+        if (produtoRepository.existsByNomeIgnoreCaseAndIdNot(request.nome(), id)) {
+            throw new ProdutoNomeDuplicadoException();
+        }
         Categoria categoria = buscarCategoriaAtiva(request.categoriaId());
 
         produto.setNome(request.nome());

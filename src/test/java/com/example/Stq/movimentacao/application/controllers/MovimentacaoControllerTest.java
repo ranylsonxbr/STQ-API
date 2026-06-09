@@ -91,7 +91,7 @@ class MovimentacaoControllerTest {
 
     private MovimentacaoResponse responseFixture() {
         return new MovimentacaoResponse(
-                MOV_ID, PRODUTO_ID, "PRD-000001", null,
+                MOV_ID, PRODUTO_ID, "PRD-000001", "Produto Teste", null,
                 TipoMovimentacao.ENTRADA, OrigemMovimentacao.MANUAL,
                 7, 0, 7, "compra", USUARIO_ID, Instant.now());
     }

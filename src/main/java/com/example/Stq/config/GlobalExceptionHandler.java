@@ -103,6 +103,11 @@ public class GlobalExceptionHandler {
         return problema(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
+    @ExceptionHandler(ProdutoNomeDuplicadoException.class)
+    public ProblemDetail handleProdutoNomeDuplicado(ProdutoNomeDuplicadoException ex) {
+        return problema(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
     @ExceptionHandler(ProdutoComPedidoEmAbertoException.class)
     public ProblemDetail handleProdutoComPedido(ProdutoComPedidoEmAbertoException ex) {
         return problema(HttpStatus.CONFLICT, ex.getMessage());

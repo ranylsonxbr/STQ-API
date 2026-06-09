@@ -21,35 +21,236 @@
   <main class="stq-content">
     <div th:replace="~{layout/fragments/alertas :: alertas}"></div>
 
+    <!-- ── Stat Cards ──────────────────────────────── -->
     <div class="row g-3 mb-4">
       <div class="col-sm-6 col-xl-3">
         <div class="stq-stat-card">
+          <div class="stq-stat-icon-wrap stq-stat-icon-ok">
+            <i data-lucide="package" class="stq-icon"></i>
+          </div>
           <div class="stq-stat-value" th:text="${totalProdutosAtivos}">0</div>
           <div class="stq-stat-label">Produtos ativos</div>
-          <span class="stq-stat-dot stq-dot-ok"></span>
         </div>
       </div>
       <div class="col-sm-6 col-xl-3">
         <div class="stq-stat-card">
+          <div class="stq-stat-icon-wrap stq-stat-icon-info">
+            <i data-lucide="truck" class="stq-icon"></i>
+          </div>
           <div class="stq-stat-value" th:text="${totalFornecedoresAtivos}">0</div>
           <div class="stq-stat-label">Fornecedores ativos</div>
-          <span class="stq-stat-dot stq-dot-info"></span>
         </div>
       </div>
       <div class="col-sm-6 col-xl-3">
         <div class="stq-stat-card">
+          <div class="stq-stat-icon-wrap stq-stat-icon-warn">
+            <i data-lucide="shopping-cart" class="stq-icon"></i>
+          </div>
           <div class="stq-stat-value" th:text="${totalPedidosAbertos}">0</div>
           <div class="stq-stat-label">Pedidos em aberto</div>
-          <span class="stq-stat-dot stq-dot-warn"></span>
         </div>
       </div>
       <div class="col-sm-6 col-xl-3">
-        <div class="stq-stat-card">
+        <a th:href="@{/web/relatorios}" class="stq-stat-card" style="text-decoration:none; display:block;">
+          <div class="stq-stat-icon-wrap stq-stat-icon-danger">
+            <i data-lucide="alert-triangle" class="stq-icon"></i>
+          </div>
           <div class="stq-stat-value" th:text="${totalAlertas}">0</div>
           <div class="stq-stat-label">Alertas de estoque</div>
-          <span class="stq-stat-dot stq-dot-danger"></span>
+        </a>
+      </div>
+    </div>
+
+    <!-- ── Ações Rápidas ───────────────────────────── -->
+    <div class="mb-4" sec:authorize="hasAnyRole('ADMIN','OPERADOR')">
+      <p class="stq-section-title">Ações rápidas</p>
+      <div class="row g-2">
+        <div class="col-6 col-sm-4 col-xl-2">
+          <a th:href="@{/web/movimentacoes/entrada}" class="stq-quick-action">
+            <i data-lucide="package-plus" class="stq-icon"></i>
+            <span class="stq-quick-action-label">Nova Entrada</span>
+          </a>
+        </div>
+        <div class="col-6 col-sm-4 col-xl-2">
+          <a th:href="@{/web/movimentacoes/saida}" class="stq-quick-action">
+            <i data-lucide="package-minus" class="stq-icon"></i>
+            <span class="stq-quick-action-label">Registrar Saída</span>
+          </a>
+        </div>
+        <div class="col-6 col-sm-4 col-xl-2">
+          <a th:href="@{/web/movimentacoes/transferencia}" class="stq-quick-action">
+            <i data-lucide="arrow-left-right" class="stq-icon"></i>
+            <span class="stq-quick-action-label">Transferência</span>
+          </a>
+        </div>
+        <div class="col-6 col-sm-4 col-xl-2">
+          <a th:href="@{/web/pedidos/novo}" class="stq-quick-action">
+            <i data-lucide="clipboard-list" class="stq-icon"></i>
+            <span class="stq-quick-action-label">Novo Pedido</span>
+          </a>
+        </div>
+        <div class="col-6 col-sm-4 col-xl-2" sec:authorize="hasRole('ADMIN')">
+          <a th:href="@{/web/movimentacoes/ajuste}" class="stq-quick-action">
+            <i data-lucide="sliders-horizontal" class="stq-icon"></i>
+            <span class="stq-quick-action-label">Ajuste de Inventário</span>
+          </a>
+        </div>
+        <div class="col-6 col-sm-4 col-xl-2">
+          <a th:href="@{/web/relatorios}" class="stq-quick-action">
+            <i data-lucide="bar-chart-2" class="stq-icon"></i>
+            <span class="stq-quick-action-label">Relatórios</span>
+          </a>
         </div>
       </div>
+    </div>
+
+    <!-- ── Linha 1: Alertas + Últimas Movimentações ── -->
+    <div class="row g-3 mb-3">
+
+      <!-- Alertas de Estoque -->
+      <div class="col-lg-6">
+        <div class="stq-panel h-100">
+          <div class="stq-panel-header">
+            <span class="stq-panel-title">
+              <i data-lucide="alert-triangle" class="stq-icon"></i>
+              Alertas de Estoque
+            </span>
+            <span class="stq-badge stq-badge-danger" th:if="${totalAlertas > 0}" th:text="${totalAlertas}"></span>
+          </div>
+          <div class="stq-panel-body">
+            <div th:if="${alertas.empty}" class="stq-panel-empty">
+              <i data-lucide="check-circle" class="stq-icon"></i>
+              Nenhum produto abaixo do mínimo
+            </div>
+            <div th:each="a : ${alertas}" class="stq-panel-row">
+              <div class="stq-panel-row-main">
+                <div class="stq-panel-row-title" th:text="${a.nomeProduto}"></div>
+                <div class="stq-panel-row-sub">
+                  <span class="stq-code" th:text="${a.sku}"></span>
+                  &nbsp;·&nbsp;
+                  <span th:text="${'Saldo: ' + a.saldoAtual + ' / Mín: ' + a.estoqueMinimo}"></span>
+                </div>
+              </div>
+              <span class="stq-badge"
+                    th:classappend="${a.status.name() == 'ZERADO'} ? 'stq-badge-danger' : 'stq-badge-warning'">
+                <span class="stq-badge-dot"></span>
+                <span th:text="${a.status.name() == 'ZERADO'} ? 'Zerado' : 'Baixo'"></span>
+              </span>
+            </div>
+            <div th:if="${totalAlertas > 10}" class="stq-panel-row" style="justify-content:center; color:var(--stq-muted); font-size:12px;">
+              + <span th:text="${totalAlertas - 10}"></span> produto(s) com alerta
+            </div>
+          </div>
+          <div class="stq-panel-footer" th:if="${!alertas.empty}">
+            <a th:href="@{/web/relatorios}" class="stq-link" style="font-size:13px;">Ver relatório completo →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Últimas Movimentações -->
+      <div class="col-lg-6">
+        <div class="stq-panel h-100">
+          <div class="stq-panel-header">
+            <span class="stq-panel-title">
+              <i data-lucide="activity" class="stq-icon"></i>
+              Últimas Movimentações
+            </span>
+          </div>
+          <div class="stq-panel-body">
+            <div th:if="${ultimasMovimentacoes.empty}" class="stq-panel-empty">
+              <i data-lucide="inbox" class="stq-icon"></i>
+              Nenhuma movimentação registrada
+            </div>
+            <div th:each="m : ${ultimasMovimentacoes}" class="stq-panel-row">
+              <span class="stq-badge"
+                    th:classappend="${m.tipo.name() == 'ENTRADA'} ? 'stq-badge-success' :
+                                    (${m.tipo.name() == 'SAIDA'} ? 'stq-badge-danger' :
+                                    (${m.tipo.name() == 'AJUSTE'} ? 'stq-badge-default' : 'stq-badge-info'))">
+                <span class="stq-badge-dot"></span>
+                <span th:text="${m.tipo}"></span>
+              </span>
+              <div class="stq-panel-row-main">
+                <div class="stq-panel-row-title" th:text="${m.nomeProduto}"></div>
+                <div class="stq-panel-row-sub"
+                     th:text="${#temporals.format(m.realizadoEm, 'dd/MM/yyyy HH:mm')}"></div>
+              </div>
+              <span style="font-size:13px; font-weight:600; color:var(--stq-text);"
+                    th:text="${(m.tipo.name() == 'ENTRADA' or m.tipo.name() == 'AJUSTE') ? '+' : '-'} + m.quantidade"></span>
+            </div>
+          </div>
+          <div class="stq-panel-footer" th:if="${!ultimasMovimentacoes.empty}">
+            <a th:href="@{/web/movimentacoes}" class="stq-link" style="font-size:13px;">Ver todas →</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Linha 2: Pedidos Aguardando Ação ───────── -->
+    <div class="row g-3">
+
+      <!-- Aguardando Aprovação -->
+      <div class="col-lg-6" sec:authorize="hasAnyRole('ADMIN','OPERADOR')">
+        <div class="stq-panel">
+          <div class="stq-panel-header">
+            <span class="stq-panel-title">
+              <i data-lucide="clock" class="stq-icon"></i>
+              Aguardando Aprovação
+            </span>
+            <span class="stq-badge stq-badge-warning" th:if="${!pedidosPendentes.empty}"
+                  th:text="${pedidosPendentes.size()}"></span>
+          </div>
+          <div class="stq-panel-body">
+            <div th:if="${pedidosPendentes.empty}" class="stq-panel-empty">
+              <i data-lucide="check" class="stq-icon"></i>
+              Nenhum pedido pendente
+            </div>
+            <div th:each="p : ${pedidosPendentes}" class="stq-panel-row">
+              <div class="stq-panel-row-main">
+                <div class="stq-panel-row-title" th:text="${p.fornecedorNome}"></div>
+                <div class="stq-panel-row-sub"
+                     th:text="${p.dataPrevisaoEntrega != null ? 'Previsão: ' + #temporals.format(p.dataPrevisaoEntrega, 'dd/MM/yyyy') : 'Sem previsão'}"></div>
+              </div>
+              <a th:href="@{/web/pedidos/{id}(id=${p.id})}" class="stq-btn stq-btn-outline stq-btn-sm">Ver</a>
+            </div>
+          </div>
+          <div class="stq-panel-footer" th:if="${!pedidosPendentes.empty}" sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/web/pedidos(status=PENDENTE)}" class="stq-link" style="font-size:13px;">Ver todos →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prontos para Receber -->
+      <div class="col-lg-6" sec:authorize="hasAnyRole('ADMIN','OPERADOR')">
+        <div class="stq-panel">
+          <div class="stq-panel-header">
+            <span class="stq-panel-title">
+              <i data-lucide="package-check" class="stq-icon"></i>
+              Prontos para Receber
+            </span>
+            <span class="stq-badge stq-badge-success" th:if="${!pedidosAprovados.empty}"
+                  th:text="${pedidosAprovados.size()}"></span>
+          </div>
+          <div class="stq-panel-body">
+            <div th:if="${pedidosAprovados.empty}" class="stq-panel-empty">
+              <i data-lucide="inbox" class="stq-icon"></i>
+              Nenhum pedido aprovado
+            </div>
+            <div th:each="p : ${pedidosAprovados}" class="stq-panel-row">
+              <div class="stq-panel-row-main">
+                <div class="stq-panel-row-title" th:text="${p.fornecedorNome}"></div>
+                <div class="stq-panel-row-sub"
+                     th:text="${p.dataPrevisaoEntrega != null ? 'Previsão: ' + #temporals.format(p.dataPrevisaoEntrega, 'dd/MM/yyyy') : 'Sem previsão'}"></div>
+              </div>
+              <a th:href="@{/web/pedidos/{id}(id=${p.id})}" class="stq-btn stq-btn-primary stq-btn-sm">Receber</a>
+            </div>
+          </div>
+          <div class="stq-panel-footer" th:if="${!pedidosAprovados.empty}">
+            <a th:href="@{/web/pedidos(status=APROVADO)}" class="stq-link" style="font-size:13px;">Ver todos →</a>
+          </div>
+        </div>
+      </div>
+
     </div>
 
   </main>
