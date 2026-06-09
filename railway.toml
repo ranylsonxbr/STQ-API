@@ -1,0 +1,10 @@
+[build]
+builder = "nixpacks"
+buildCommand = "./mvnw clean package -DskipTests"
+
+[deploy]
+startCommand = "java -Xmx300m -Xms64m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m -jar target/Stq-0.0.1-SNAPSHOT.jar"
+healthcheckPath = "/estoque-ai"
+healthcheckTimeout = 100
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
