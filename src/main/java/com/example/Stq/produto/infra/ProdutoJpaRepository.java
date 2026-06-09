@@ -24,4 +24,6 @@ public interface ProdutoJpaRepository
     Optional<Produto> findBySku(String sku);
 
     boolean existsByCategoria_IdAndAtivoTrue(UUID categoriaId);
+    boolean existsByNomeIgnoreCase(String nome);
+    boolean existsByNomeIgnoreCaseAndIdNot(String nome, UUID id);
 }

@@ -10,6 +10,7 @@ import com.example.Stq.produto.application.services.CategoriaService;
 import com.example.Stq.produto.application.services.ProdutoService;
 import com.example.Stq.produto.application.services.VariacaoProdutoService;
 import com.example.Stq.produto.domain.UnidadeMedida;
+import com.example.Stq.produto.domain.exception.ProdutoNomeDuplicadoException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -85,9 +86,17 @@ public class ProdutoWebController {
                 UnidadeMedida.valueOf(produtoForm.unidadeMedida()),
                 produtoForm.estoqueMinimo()
         );
-        var response = produtoService.criar(request);
-        redirectAttributes.addFlashAttribute("sucesso", "Produto criado com sucesso.");
-        return "redirect:/web/produtos/" + response.id();
+        try {
+            var response = produtoService.criar(request);
+            redirectAttributes.addFlashAttribute("sucesso", "Produto criado com sucesso.");
+            return "redirect:/web/produtos/" + response.id();
+        } catch (ProdutoNomeDuplicadoException ex) {
+            bindingResult.rejectValue("nome", "duplicado", ex.getMessage());
+            model.addAttribute("categorias", categoriaService.listar(null, true, PageRequest.of(0, 200)).getContent());
+            model.addAttribute("unidades", UnidadeMedida.values());
+            model.addAttribute("editando", false);
+            return "produto/form";
+        }
     }
 
     @GetMapping("/{id}/editar")
@@ -130,9 +139,18 @@ public class ProdutoWebController {
                 produtoForm.estoqueMinimo(),
                 null
         );
-        produtoService.atualizar(id, request);
-        redirectAttributes.addFlashAttribute("sucesso", "Produto atualizado com sucesso.");
-        return "redirect:/web/produtos/" + id;
+        try {
+            produtoService.atualizar(id, request);
+            redirectAttributes.addFlashAttribute("sucesso", "Produto atualizado com sucesso.");
+            return "redirect:/web/produtos/" + id;
+        } catch (ProdutoNomeDuplicadoException ex) {
+            bindingResult.rejectValue("nome", "duplicado", ex.getMessage());
+            model.addAttribute("produtoId", id);
+            model.addAttribute("categorias", categoriaService.listar(null, true, PageRequest.of(0, 200)).getContent());
+            model.addAttribute("unidades", UnidadeMedida.values());
+            model.addAttribute("editando", true);
+            return "produto/form";
+        }
     }
 
     @PostMapping("/{id}/desativar")
@@ -177,8 +195,12 @@ public class ProdutoWebController {
             @RequestParam String atributo,
             @RequestParam String valor,
             RedirectAttributes redirectAttributes) {
-        variacaoProdutoService.adicionar(id, new VariacaoCreateRequest(atributo, valor));
-        redirectAttributes.addFlashAttribute("sucesso", "Variação adicionada com sucesso.");
+        try {
+            variacaoProdutoService.adicionar(id, new VariacaoCreateRequest(atributo, valor));
+            redirectAttributes.addFlashAttribute("sucesso", "Variação adicionada com sucesso.");
+        } catch (RuntimeException ex) {
+            redirectAttributes.addFlashAttribute("erro", ex.getMessage());
+        }
         return "redirect:/web/produtos/" + id;
     }
 }

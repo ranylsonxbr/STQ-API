@@ -44,6 +44,16 @@ public class ProdutoRepositoryImpl implements ProdutoRepository {
     }
 
     @Override
+    public boolean existsByNomeIgnoreCase(String nome) {
+        return jpa.existsByNomeIgnoreCase(nome);
+    }
+
+    @Override
+    public boolean existsByNomeIgnoreCaseAndIdNot(String nome, UUID id) {
+        return jpa.existsByNomeIgnoreCaseAndIdNot(nome, id);
+    }
+
+    @Override
     public Page<Produto> findAll(ProdutoFiltro filtro, Pageable pageable) {
         Specification<Produto> spec = (root, query, cb) -> cb.conjunction();
 
