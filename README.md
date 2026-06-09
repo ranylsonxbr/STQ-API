@@ -100,6 +100,40 @@ O Flyway roda automaticamente as migrations na primeira inicialização.
 
 ---
 
+## Primeiro acesso
+
+O banco começa vazio — não há usuário pré-cadastrado. Siga os passos abaixo para criar o primeiro administrador:
+
+### 1. Crie sua conta
+
+Acesse a página de cadastro público (não requer login):
+
+```
+http://localhost:8080/estoque-ai/web/usuarios/registro
+```
+
+Preencha nome, e-mail e senha. A conta é criada com perfil **VISUALIZADOR** por padrão.
+
+### 2. Promova para ADMIN no banco
+
+Conecte ao PostgreSQL e execute:
+
+```sql
+UPDATE stq.usuario
+SET perfil = 'ADMIN'
+WHERE email = 'seu@email.com';
+```
+
+### 3. Faça login
+
+Acesse `http://localhost:8080/estoque-ai/web/login` com as credenciais cadastradas.
+Com o perfil `ADMIN` você terá acesso completo, incluindo a seção **Usuários** no menu lateral para criar e gerenciar as demais contas da equipe.
+
+> **Demais usuários** (OPERADOR, VISUALIZADOR) são criados pelo ADMIN em
+> `Administração → Usuários → Novo Usuário`, sem necessidade de acesso ao banco.
+
+---
+
 ## Variáveis de ambiente
 
 | Variável           | Padrão                                                         | Descrição                   |
