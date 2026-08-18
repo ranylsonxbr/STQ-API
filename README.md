@@ -1,4 +1,4 @@
-# estoque-ai
+# estoque-api
 
 Plataforma de gerenciamento de estoque com controle de produtos, fornecedores, movimentações (entradas, saídas, transferências), pedidos de compra e relatórios. Interface web SSR construída com Thymeleaf e API REST documentada com Swagger/OpenAPI.
 
